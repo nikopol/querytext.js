@@ -1,8 +1,8 @@
 querytext.js 0.1 (c) 2012 niko
-
 test if a text match a boolean query
 
 supported query syntax:
+
   - AND (including + leading character)
   - OR  (including | character)
   - NOT (including leading ! or - charaters),
@@ -12,14 +12,14 @@ supported query syntax:
 
 usages:
 	
-  querytext('!!tata')->match('toto TaTa TITI'); //return true
-  querytext('--zaza')->match('toto TaTa TITI'); //return true
-  querytext('NOT NOT zaza')->match('toto TaTa TITI');  //return true
+  querytext('!!tata').match('toto TaTa TITI'); //return true
+  querytext('--zaza').match('toto TaTa TITI'); //return true
+  querytext('NOT NOT zaza').match('toto TaTa TITI');  //return true
 
-  querytext('-tata')->match('toto TaTa TITI'); //return false
+  querytext('-tata').match('toto TaTa TITI'); //return false
 
-  querytext('toto AND "TATA TITI"')->match('toto TaTa TITI'); //return true
-  querytext('toto +"TATA TITI"')->match('toto TaTa TITI'); //return true
+  querytext('toto AND "TATA TITI"').match('toto TaTa TITI'); //return true
+  querytext('toto +"TATA TITI"').match('toto TaTa TITI'); //return true
 
   var qt = querytext('toto AND (tata OR zizi)'); //return an object
   qt.match('toto TaTa TITI');  //return true
@@ -31,8 +31,8 @@ usages:
    |  | "tata" = true
    |  | "zizi"
 
-  querytext('toto tata')->normalize() //return "toto" OR "tata"
-  querytext('toto -tata titi')->normalize() //return ("toto" AND NOT "tata") OR "titi"
+  querytext('toto tata').normalize() //return "toto" OR "tata"
+  querytext('toto -tata titi').normalize() //return ("toto" AND NOT "tata") OR "titi"
 
 =========================================================================
 LICENSE
