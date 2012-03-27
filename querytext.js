@@ -1,7 +1,7 @@
 /*
 querytext.js (c) 2012 niko
 
-test a query against a text
+test if a text match a boolean query
 
 supported query syntax:
   - AND (including + leading character)
