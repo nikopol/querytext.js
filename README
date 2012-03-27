@@ -1,0 +1,57 @@
+querytext.js (c) 2012 niko
+
+test a query against a text
+
+supported query syntax:
+  - AND (including + leading character)
+  - OR  (including | character)
+  - NOT (including leading ! or - charaters),
+  - parenthesis
+  - left and right truncatures (with * character)
+  - quotes
+
+usages:
+	
+	querytext('!!tata')->match('toto TaTa TITI'); //return true
+	querytext('--zaza')->match('toto TaTa TITI'); //return true
+	querytext('NOT NOT zaza')->match('toto TaTa TITI');  //return true
+
+	querytext('-tata')->match('toto TaTa TITI'); //return false
+
+	
+	querytext('toto AND "TATA TITI"')->match('toto TaTa TITI'); //return true
+	querytext('toto +"TATA TITI"')->match('toto TaTa TITI'); //return true
+	
+	var qt = querytext('toto AND (tata OR zizi)'); //return an object
+	qt.match('toto TaTa TITI');  //return true
+	console.log(qt.dump()); //output the following dump
+	
+	AND = 1
+	 | "toto" = 1
+	 | OR = 1 : (tata OR zizi)
+	 |  | "tata" = 1
+	 |  | "zizi"
+	
+	
+	querytext('toto tata')->normalize() //return "toto" OR "tata"
+	querytext('toto -tata titi')->as_string() //return ("toto" AND NOT "tata") OR "titi"
+
+=========================================================================
+LICENSE
+=========================================================================
+
+DO WHAT THE FUCK YOU WANT WITH
+ESPECIALLY IF YOU OFFER ME A BEER
+PUBLIC LICENSE
+Version 1, Mars 2012
+ 
+Copyright (C) 2012 - niko
+ 
+Everyone is permitted to copy and distribute verbatim 
+or modified copies of this license document, and 
+changing it is allowed as long as the name is changed.
+
+DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND 
+MODIFICATION :
+- You just DO WHAT THE FUCK YOU WANT.
