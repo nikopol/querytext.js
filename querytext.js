@@ -193,7 +193,9 @@ var querytext=(function(o){
 					? not+'('+this.normalize(node.ope1)+' '+node.bool+' '+this.normalize(node.ope2)+')'
 					: this.normalize(node.ope1)+' '+node.bool+' '+this.normalize(node.ope2);
 			}
-			return not+'"'+node.text+'"';
+			return /\s/.test(node.text)
+				? not+'"'+node.text+'"'
+				: not+node.text;
 		},
 		match: function(txt){
 			if(!this.tree) return false;
