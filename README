@@ -10,8 +10,28 @@ supported query syntax:
   - left and right truncatures (with * character)
   - quotes
 
+constructors:
+
+  querytext()          // get empty querytext object
+  querytext("query")   // get querytext object with a parsed query
+  querytext({          // get an object object with a parsed query
+    sensisitive: true, //   and options setted
+    debug: true,
+    query: "query"
+  })                 
+
+methods:
+
+  parse('query');    //return {error:"msg",pos:12} or the 
+                     //querytext object
+  normalize();       //return the normalized query as string
+  match('text');     //return true if the text match the query
+  dump();            //return a string dump of the query tree
+                     //(called after match, its include each
+                     // nodes results)
+
 usages:
-	
+  
   querytext('!!tata').match('toto TaTa TITI'); //return true
   querytext('--zaza').match('toto TaTa TITI'); //return true
   querytext('NOT NOT zaza').match('toto TaTa TITI');  //return true
