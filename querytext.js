@@ -31,7 +31,6 @@ methods:
                      //(called after match, its include each
                      // nodes results)
 
-
 usages:
 	
   querytext('!!tata').match('toto TaTa TITI'); //return true
@@ -141,6 +140,7 @@ var querytext=(function(o){
 							if( qry[n] == '"' ) {
 								q = n++;
 								while( n < len && qry[n] != '"') t += qry[n++];
+								t += qry[n];
 								if( n >= len ) return {error:'unbalanced quotes',pos:q+offset};
 							}
 							n++;
