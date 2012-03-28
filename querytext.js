@@ -11,6 +11,27 @@ supported query syntax:
   - left and right truncatures (with * character)
   - quotes
 
+constructors:
+
+  querytext()          // get empty querytext object
+  querytext("query")   // get querytext object with a parsed query
+  querytext({          // get an object object with a parsed query
+  	sensisitive: true, //   and options setted
+  	debug: true,
+  	query: "query"
+  })                 
+
+methods:
+
+  parse('query');    //return {error:"msg",pos:12} or the 
+                     //querytext object
+  normalize();       //return the normalized query as string
+  match('text');     //return true if the text match the query
+  dump();            //return a string dump of the query tree
+                     //(called after match, its include each
+                     // nodes results)
+
+
 usages:
 	
   querytext('!!tata').match('toto TaTa TITI'); //return true
@@ -59,6 +80,7 @@ MODIFICATION :
 var querytext=(function(o){
 	var qt = {
 		sensitive: false,
+		debug: false,
 		error: false,
 		query: false,
 		tree:  false,
@@ -166,8 +188,13 @@ var querytext=(function(o){
 			this.tree  = false;
 			this.query = q;
 			var b = parse_branch( q, 0, this.sensitive );
-			if( b.error ) this.error = b; else this.tree = b;
-			//say $self->{query},"\n",$self->dump() if $self->{dump};
+			if( b.error ){
+				this.error = b;
+				if(this.debug) console.log(b.error,'at',b.pos);
+			} else {
+				this.tree = b;
+				if(this.debug) console.log(this.dump());
+			} 
 			return this;
 		},
 		dump: function(node,ind){
@@ -225,10 +252,19 @@ var querytext=(function(o){
 				};
 			reset_node( this.tree );
 			var ok = node_match( this.tree, txt );
-			//say $self->{query},"\n",$self->dump() if $self->{dump};
+			if(this.debug) console.log(this.dump());
 			return ok;
 		}
 	};
-	if(query) qt.parse(o);
+	if(o){
+		if(typeof(o)=='string')
+			qt.parse(o);
+		else if(typeof(o)=="object") {
+			['debug','sensitive'].forEach(function(n){
+				if(o[n]) qt[n]=o[n];
+			});
+			if(o.query) qt.parse(o.query);
+		}
+	}
 	return qt;
 });
