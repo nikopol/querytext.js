@@ -106,7 +106,7 @@ var querytext=(function(o){
 							var rtrunc = txt.substr(-1) == '*' ? '' : '($|\\W:?)';
 							//escape special regexp chars
 							['(',')','+','*','?',':','[',']'].forEach(function(c){
-								txt = txt.replace(c,'\c');
+								txt = txt.replace(c,'\\'+c);
 							});
 							//concats spaces
 							txt = txt.replace(/\s+/g,'\\s+');
