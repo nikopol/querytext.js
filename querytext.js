@@ -1,5 +1,5 @@
 /*
-querytext.js 0.1 (c) 2012 niko
+querytext.js 0.2 (c) 2012 niko
 test if a text match a boolean query
 
 supported query syntax:
@@ -15,18 +15,23 @@ constructors:
 
   querytext()          // get empty querytext object
   querytext("query")   // get querytext object with a parsed query
-  querytext({          // get an object object with a parsed query
-  	sensisitive: true, //   and options setted
-  	debug: true,
-  	query: "query"
-  })                 
+  querytext({          // get an object object with options:
+    sensisitive: false,//   case sensitive (default=false)
+    wholeword: true,   //   whole word only (default=true)
+    unaccent: true,    //   accent unsensitive (default=true)
+    matches: false,    //   want matched words with their position
+    debug: false,      //   console debugging ouput (default=false)
+    query: "query"     //   query string
+  })
 
 methods:
 
   parse('query');    //return {error:"msg",pos:12} or the 
                      //querytext object
   normalize();       //return the normalized query as string
-  match('text');     //return true if the text match the query
+  match('text');     //test if the text match the query
+                     //  if matches flag is true  => return { word:[pos1,pos2], ... } or false
+                     //  if matches flag is false => return true or false
   dump();            //return a string dump of the query tree
                      //(called after match, its include each
                      // nodes results)
@@ -55,6 +60,8 @@ usages:
   querytext('toto tata').normalize() //return "toto" OR "tata"
   querytext('toto -tata titi').normalize() //return ("toto" AND NOT "tata") OR "titi"
 
+  querytext({query:"T",matches:true,wholeword:false}).match("toto") //return {t:[0,2]}
+
 =========================================================================
 LICENSE
 =========================================================================
@@ -62,7 +69,7 @@ LICENSE
 DO WHAT THE FUCK YOU WANT WITH
 ESPECIALLY IF YOU OFFER ME A BEER
 PUBLIC LICENSE
-Version 1, Mars 2012
+Version 1, March 2012
  
 Copyright (C) 2012 - niko
  
@@ -70,21 +77,55 @@ Everyone is permitted to copy and distribute verbatim
 or modified copies of this license document, and 
 changing it is allowed as long as the name is changed.
 
-DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+DO WHAT THE FUCK YOU WANT TO PUBLIC
+ESPECIALLY IF YOU OFFER ME A BEER LICENSE
 TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND 
 MODIFICATION :
 - You just DO WHAT THE FUCK YOU WANT.
+- Especially if you offer me a beer.
+
 */
 
 var querytext=(function(o){
-	var qt = {
-		sensitive: false,
-		debug: false,
+	var
+	unaccent = function(t){
+		return t
+			.replace(/Æ/gm,'AE')
+			.replace(/[ÁÂÀÅÃÄ]/gm,'A')
+			.replace(/Ç/gm,'C')
+			.replace(/[ÉÊÈË]/gm,'E')
+			.replace(/[ÍÎÌÏ]/gm,'I')
+			.replace(/Ñ/gm,'N')
+			.replace(/Œ/gm,'OE')
+			.replace(/[ÓÔÒØÕÖ]/gm,'O')
+			.replace(/[ÚÛÙÜ]/gm,'U')
+			.replace(/Ý/gm,'Y')
+			.replace(/æ/gm,'ae')
+			.replace(/[áâàåãä]/gm,'a')
+			.replace(/ç/gm,'c')
+			.replace(/[éêèë]/gm,'e')
+			.replace(/[íîìï]/gm,'i')
+			.replace(/ñ/gm,'n')
+			.replace(/œ/gm,'oe')
+			.replace(/[óôòøõö]/gm,'o')
+			.replace(/[úûùü]/gm,'u')
+			.replace(/[ýÿ]/gm,'y')
+	},
+	qt = {
+		VERSION: 0.2,
+		opts: {
+			dftbool: 'OR',
+			sensitive: false,
+			wholeword: true,
+			unaccent: true,
+			matches: false,
+			debug: false
+		},
 		error: false,
 		query: false,
 		tree:  false,
 		parse: function(q){
-			var parse_branch = function(qry, offset, sensitive){
+			var parse_branch = function(qry, offset, opts){
 				//qry = qry.replace(/(^\s+|\s+$)/g,''); //trim
 				if(!offset) offset = 0;
 				var
@@ -102,20 +143,28 @@ var querytext=(function(o){
 						if(node.text){
 							var txt = node.text.replace(/(^\s+|\s+$)/gm,'');
 							//set truncatures
-							var ltrunc = txt[0] == '*' ? '' : '(^|\\W:?)';
-							var rtrunc = txt.substr(-1) == '*' ? '' : '($|\\W:?)';
+							var ltrunc = (txt[0] == '*' || !opts.wholeword) ? '' : '(^|\\W:?)';
+							var rtrunc = (txt.substr(-1) == '*' || !opts.wholeword) ? '' : '($|\\W:?)';
 							//escape special regexp chars
 							['(',')','+','*','?',':','[',']'].forEach(function(c){
 								txt = txt.replace(c,'\\'+c);
 							});
 							//concats spaces
 							txt = txt.replace(/\s+/g,'\\s+');
-							node.rex = new RegExp(ltrunc+txt+rtrunc, sensitive ? 'm' : 'im');
+							node.rex = new RegExp(
+								ltrunc+txt+rtrunc,
+								'm'+(opts.sensitive?'':'i')+(opts.matches?'g':'')
+							);
 						}
 						if(src) node.src = src;
-						root = root 
-							? { bool: mode || 'OR', ope1: root, ope2: node }
-							: node;
+						if(root) {
+							if(!mode) mode = opts.dftbool;
+							if(mode===root.bool && not===(root.not||false)) 
+								root.subs.push(node);
+							else
+								root = { bool: mode, subs: [ root, node ] };
+						} else
+							root = node;
 						mode = false;
 					};
 
@@ -146,7 +195,7 @@ var querytext=(function(o){
 							n++;
 						}
 						if( n >= len ) return {error:'unbalanced parenthesis',pos:o+offset};
-						var b = parse_branch( t, o+1, sensitive );
+						var b = parse_branch( t, o+1, opts );
 						if(b.error) return b;
 						add_branch(b,t);
 						n++;
@@ -186,14 +235,14 @@ var querytext=(function(o){
 			};
 			this.error = 
 			this.tree  = false;
-			this.query = q;
-			var b = parse_branch( q, 0, this.sensitive );
+			this.query = this.opts.unaccent ? unaccent(q) : q;
+			var b = parse_branch( this.query, 0, this.opts );
 			if( b.error ){
 				this.error = b;
-				if(this.debug) console.log(b.error,'at',b.pos);
+				if(this.opts.debug) console.log(b.error,'at',b.pos);
 			} else {
 				this.tree = b;
-				if(this.debug) console.log(this.dump());
+				if(this.opts.debug) console.log(this.dump());
 			} 
 			return this;
 		},
@@ -205,20 +254,23 @@ var querytext=(function(o){
 				not = node.not ? 'NOT ' : '',
 				src = node.src ? ' : '+not+'('+node.src+')' : '',
 				hit = node.match!=undefined ? ' = '+node.match : '';
+				self = this;
 			return node.bool
-				? ind+not+node.bool+hit+src+"\n"+
-					this.dump(node.ope1,ind+' | ')+"\n"+
-					this.dump(node.ope2,ind+' | ')
+				? ind+not+node.bool+hit+src+"\n"+node.subs.map(function(n){ return self.dump(n,ind+' | ') }).join("\n")
 				: ind+not+'"'+node.text+'"'+hit;
 		},
 		normalize: function(node){
 			if(!node) node = this.tree;
 			if(!node) return '';
-			var not = node.not ? 'NOT ' : '';
+			var
+				not = node.not ? 'NOT ' : '',
+				lst = [],
+				self = this;
 			if( node.bool ) {
+				node.subs.forEach(function(n){ lst.push(self.normalize(n)) });
 				return (not || node != this.tree)
-					? not+'('+this.normalize(node.ope1)+' '+node.bool+' '+this.normalize(node.ope2)+')'
-					: this.normalize(node.ope1)+' '+node.bool+' '+this.normalize(node.ope2);
+					? not+'('+lst.join(' '+node.bool)+')'
+					: lst.join(' '+node.bool);
 			}
 			return /\s/.test(node.text)
 				? not+'"'+node.text+'"'
@@ -226,42 +278,63 @@ var querytext=(function(o){
 		},
 		match: function(txt){
 			if(!this.tree) return false;
-			var 
+			var
+				self = this, 
 				reset_node = function(node){
 					delete node.match;
-					if( node.bool ) {
-						reset_node( node.ope1 );
-						reset_node( node.ope2 );
-					}
+					if( node.bool )
+						node.subs.forEach(function(n){ reset_node(n) });
 				},
-				node_match = function(node, text){
-					var ok = false;
+				node_match = function(node, text, matches){
+					var ok, i, w, p, l;
 					if( node.bool ) {
-						ok = node.bool == 'AND'
-							? node_match(node.ope1,text) && node_match(node.ope2,text)
-							: node_match(node.ope1,text) || node_match(node.ope2,text);
-						if(node.not) ok = !ok;
-						node.match = ok;
-					} else {
+						if(node.bool == 'AND')
+							for(ok=true,i=0;i<node.subs.length && ok;++i)
+								ok = node_match(node.subs[i],text,matches);
+						else
+							for(ok=false,i=0;i<node.subs.length;++i){
+								ok = node_match(node.subs[i],text,matches) || ok;
+								if(ok && !match) break;
+							}
+					} else if( matches!==false && !node.not ) {
+						ok = false;
+						while((i = node.rex.exec(text)) != null){
+							ok = true;
+							w = i[0];
+							p = i.index;
+							if( !self.opts.sensitive )
+								w = w.toLowerCase();
+							if( self.opts.wholeword ){
+								l = w.length;
+								w = w.replace(/^\W+|\W+$/g,'');
+								p += (l-w.length);
+							}
+							if(matches[w]==undefined) matches[w] = [];
+							matches[w].push(p);
+						}
+					} else
 						ok = node.rex.test( text );
-						if(node.not) ok = !ok;
-						console.log((node.not?'NOT ':'')+node.text+' = '+ok);
-						node.match = ok;
-					}
+					if(node.not) ok = !ok;
+					node.match = ok;
 					return ok;
-				};
+				},
+				ok,
+				matches = this.opts.matches ? {} : false;
 			reset_node( this.tree );
-			var ok = node_match( this.tree, txt );
-			if(this.debug) console.log(this.dump());
-			return ok;
+			ok = node_match( this.tree, this.opts.unaccent ? unaccent(txt) : txt, matches );
+			if(this.opts.debug) {
+				console.log(this.dump());
+				if(matches) console.log(matches);
+			}
+			return this.opts.matches && ok ? matches : ok;
 		}
 	};
 	if(o){
 		if(typeof(o)=='string')
 			qt.parse(o);
-		else if(typeof(o)=="object") {
-			['debug','sensitive'].forEach(function(n){
-				if(o[n]) qt[n]=o[n];
+		else if(typeof(o)=='object') {
+			['debug','sensitive','wholeword','unaccent','matches'].forEach(function(n){
+				if(o[n]!==undefined) qt.opts[n]=o[n];
 			});
 			if(o.query) qt.parse(o.query);
 		}

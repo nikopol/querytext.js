@@ -1,4 +1,4 @@
-querytext.js 0.1 (c) 2012 niko
+querytext.js 0.2 (c) 2012 niko
 test if a text match a boolean query
 
 supported query syntax:
@@ -14,18 +14,23 @@ constructors:
 
   querytext()          // get empty querytext object
   querytext("query")   // get querytext object with a parsed query
-  querytext({          // get an object object with a parsed query
-    sensisitive: true, //   and options setted
-    debug: true,
-    query: "query"
-  })                 
+  querytext({          // get an object object with options:
+    sensisitive: false,//   case sensitive (default=false)
+    wholeword: true,   //   whole word only (default=true)
+    unaccent: true,    //   accent unsensitive (default=true)
+    matches: false,    //   want matched words with their position (default=false)
+    debug: false,      //   console debugging ouput (default=false)
+    query: "query"     //   query string
+  })
 
 methods:
 
   parse('query');    //return {error:"msg",pos:12} or the 
                      //querytext object
   normalize();       //return the normalized query as string
-  match('text');     //return true if the text match the query
+  match('text');     //test if the text match the query
+                     //  if matches flag is true  => return { word:[pos1,pos2], ... } or false
+                     //  if matches flag is false => return true or false
   dump();            //return a string dump of the query tree
                      //(called after match, its include each
                      // nodes results)
@@ -54,6 +59,9 @@ usages:
   querytext('toto tata').normalize() //return "toto" OR "tata"
   querytext('toto -tata titi').normalize() //return ("toto" AND NOT "tata") OR "titi"
 
+  querytext({query:"T",matches:true,wholeword:false}).match("toto") //return {t:[0,2]}
+
+
 =========================================================================
 LICENSE
 =========================================================================
@@ -61,7 +69,7 @@ LICENSE
 DO WHAT THE FUCK YOU WANT WITH
 ESPECIALLY IF YOU OFFER ME A BEER
 PUBLIC LICENSE
-Version 1, Mars 2012
+Version 1, March 2012
  
 Copyright (C) 2012 - niko
  
@@ -69,7 +77,9 @@ Everyone is permitted to copy and distribute verbatim
 or modified copies of this license document, and 
 changing it is allowed as long as the name is changed.
 
-DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+DO WHAT THE FUCK YOU WANT TO PUBLIC
+ESPECIALLY IF YOU OFFER ME A BEER LICENSE
 TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND 
 MODIFICATION :
 - You just DO WHAT THE FUCK YOU WANT.
+- Especially if you offer me a beer.
