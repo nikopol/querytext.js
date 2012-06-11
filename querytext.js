@@ -294,7 +294,7 @@ var querytext=(function(o){
 						else
 							for(ok=false,i=0;i<node.subs.length;++i){
 								ok = node_match(node.subs[i],text,matches) || ok;
-								if(ok && !match) break;
+								if(ok && !matches) break;
 							}
 					} else if( matches!==false && !node.not ) {
 						ok = false;
