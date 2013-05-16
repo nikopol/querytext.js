@@ -14,7 +14,8 @@
 		input[type="text"] { width: 500px; }
 		label { float: left; display: block; width: 100px; text-align: right; }
 		.error { color: #f44; }
-		#result { padding: 5px; font-size: 50px; text-align: center }
+		#result { padding: 5px; font-size: 30px; text-align: center }
+		pre { font-size: 12px; text-align: left; }
 	</style>
 	<title>QueryText</title>
 	<script type="text/javascript" src="querytext.js"></script>
@@ -29,7 +30,7 @@
 					unaccent: _('#unaccent').checked,
 					sensitive: _('#sensitive').checked,
 					wholeword: _('#wholeword').checked,
-					matches: true,
+					matches: _('#match').checked,
 					query: _('#query').value
 				});
 				if(q.error){
@@ -38,7 +39,11 @@
 				} else {
 					var v = _('#text').value;
 					var z = q.match(v);
-					r.innerHTML=z ? "match<br/>" : "don't match<br/>"+q.dump();
+					r.innerHTML = z ? "match!" : "don't match";
+					if(_('#match').checked)
+						for(var k in z) 
+							r.innerHTML += ' '+k+':'+z[k].join(',');
+					r.innerHTML += "<br/><pre>"+q.dump()+'</pre>';
 				}
 			};
 		});
@@ -59,9 +64,10 @@
 	<form>
 		<div><label for="query">Query</label><textarea id="query">"James Bond" AND sarkozy</textarea></div>
 		<div><label for="wholeword">WholeWord</label><input id="wholeword" type="checkbox" checked="checked"/></div>
-		<div><label for="sensitive">Sensitive</label><input id="sensitive" type="checkbox"/></div>
+		<div><label for="sensitive">Case sensitive</label><input id="sensitive" type="checkbox"/></div>
 		<div><label for="unaccent">Unaccent</label><input id="unaccent" type="checkbox" checked="checked"/></div>
-		<div><label for="debug">Debug</label><input id="debug" type="checkbox" checked="checked"/></div>
+		<div><label for="match">Matches</label><input id="match" type="checkbox" checked="checked"/> return match's positions (query tree optimized if not)</div>
+		<div><label for="debug">Debug</label><input id="debug" type="checkbox" checked="checked"/> (console logs)</div>
 		<input id="search" type="button" value="search" />
 	</form>
 	<div id="result"></div>
