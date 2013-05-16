@@ -236,8 +236,10 @@ var querytext=(function(o){
 			this.tree  = false;
 			this.query = this.opts.unaccent ? unaccent(q) : q;
 			var b = parse_branch( this.query, 0, this.opts );
+			delete this.pos;
 			if( b.error ){
 				this.error = b.error;
+				this.pos = b.pos;
 				if(this.opts.debug) console.log(b.error,'at',b.pos);
 			} else {
 				this.tree = b;

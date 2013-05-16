@@ -35,7 +35,7 @@
 				});
 				if(q.error){
 					css(r,'+error');
-					r.innerHTML=q.error;
+					r.innerHTML=q.error+' at '+q.pos;
 				} else {
 					var v = _('#text').value;
 					var z = q.match(v);
