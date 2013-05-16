@@ -145,10 +145,9 @@ var querytext=(function(o){
 							//set truncatures
 							var ltrunc = (txt[0] == '*' || !opts.wholeword) ? '' : '(^|\\W:?)';
 							var rtrunc = (txt.substr(-1) == '*' || !opts.wholeword) ? '' : '($|\\W:?)';
+							txt = txt.replace(/(^\*|\*$)/g,'');
 							//escape special regexp chars
-							['(',')','+','*','?',':','[',']'].forEach(function(c){
-								txt = txt.replace(c,'\\'+c);
-							});
+							txt = txt.replace(/([\(\)\+\*\?\:\[\]])/g,"\\$1");
 							//concats spaces
 							txt = txt.replace(/\s+/g,'\\s+');
 							node.rex = new RegExp(
@@ -199,8 +198,8 @@ var querytext=(function(o){
 						if(b.error) return b;
 						add_branch(b,t);
 						n++;
-					} else if( qry[n] == ' ' ) { //SKIP SPACES
-						while( n < len && qry[n] == ' ') n++;
+					} else if( qry[n] <= ' ' ) { //SKIP SPACES
+						while( n < len && qry[n] <= ' ') n++;
 					} else if( qry[n] == '+' ) { //AND
 						if( not || mode ) return {error:'unexpected operator',pos:n+offset};
 						mode = 'AND';
@@ -215,8 +214,8 @@ var querytext=(function(o){
 					} else {                    //PARSE WORD
 						o = n;
 						t = '';
-						while( n < len && !/[\(\)\s\+\-\|\!]/.test(qry[n]) ) t += qry[n++];
-						if( /^(AND|OR|NOT)$/i.test(t) ) { //booleans
+						while( n < len && qry[n] > ' ' && !/[\(\)\+\-\|\!]/.test(qry[n]) ) t += qry[n++];
+						if( /^(AND|OR|NOT|NEAR\d)$/i.test(t) ) { //booleans
 							op = o;
 							var b = RegExp.$1.toUpperCase();
 							if( b == 'NOT' ) {
@@ -231,14 +230,14 @@ var querytext=(function(o){
 					}
 				}
 				if( not || mode ) return {error:'unexpected operator',pos:op+offset};
-				return root;
+				return root ? root : {error:'empty query',pos:offset};
 			};
 			this.error = 
 			this.tree  = false;
 			this.query = this.opts.unaccent ? unaccent(q) : q;
 			var b = parse_branch( this.query, 0, this.opts );
 			if( b.error ){
-				this.error = b;
+				this.error = b.error;
 				if(this.opts.debug) console.log(b.error,'at',b.pos);
 			} else {
 				this.tree = b;
