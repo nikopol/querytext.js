@@ -112,7 +112,7 @@ var querytext=(function(o){
 			.replace(/[ýÿ]/gm,'y')
 	},
 	qt = {
-		VERSION: 0.2,
+		VERSION: 0.3,
 		opts: {
 			dftbool: 'OR',
 			sensitive: false,
