@@ -271,7 +271,7 @@ var querytext=(function(o){
 				node.subs.forEach(function(n){ lst.push(self.normalize(n)) });
 				return (not || node != this.tree)
 					? not+'('+lst.join(' '+node.bool)+')'
-					: lst.join(' '+node.bool);
+					: lst.join(' '+node.bool+' ');
 			}
 			return /\s/.test(node.text)
 				? not+'"'+node.text+'"'
