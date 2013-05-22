@@ -273,7 +273,7 @@ var querytext=(function(o){
 					? not+'('+lst.join(' '+node.bool+' ')+')'
 					: lst.join(' '+node.bool+' ');
 			}
-			return /\s/.test(node.text)
+			return /\s/.test(node.text) || /^(and|or|not)$/i.test(node.text)
 				? not+'"'+node.text+'"'
 				: not+node.text;
 		},
