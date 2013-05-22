@@ -264,7 +264,7 @@ var querytext=(function(o){
 			if(!node) node = this.tree;
 			if(!node) return '';
 			var
-				not = node.not ? 'NOT ' : '',
+				not = node.not ? 'NOT ' : ' ',
 				lst = [],
 				self = this;
 			if( node.bool ) {
