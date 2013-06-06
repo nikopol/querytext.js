@@ -1,5 +1,5 @@
 /*
-querytext.js 0.2 (c) 2012 niko
+querytext.js 0.3 (c) 2012 niko
 test if a text match a boolean query
 
 supported query syntax:
@@ -273,7 +273,7 @@ var querytext=(function(o){
 					? not+'('+lst.join(' '+node.bool+' ')+')'
 					: lst.join(' '+node.bool+' ');
 			}
-			return /\s/.test(node.text) || /^(and|or|not)$/i.test(node.text)
+			return /\s/.test(node.text) || /^(and|or|not)$/i.test(node.text) || /[\(\)\+\-\!\?\|]/.test(node.text)
 				? not+'"'+node.text+'"'
 				: not+node.text;
 		},
