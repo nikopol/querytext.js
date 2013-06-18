@@ -1,5 +1,5 @@
 /*
-querytext.js 0.3 (c) 2012 niko
+querytext.js 0.4 (c) 2012-2013 niko
 test if a text match a boolean query
 
 supported query syntax:
@@ -35,6 +35,9 @@ methods:
   dump();            //return a string dump of the query tree
                      //(called after match, its include each
                      // nodes results)
+  highlight('text','before','after') //highlight a text with the
+                     //query, inserting 'before' and 'after' each
+                     //matching node
 
 usages:
 	
@@ -307,8 +310,9 @@ var querytext=(function(o){
 								w = w.toLowerCase();
 							if( self.opts.wholeword ){
 								l = w.length;
-								w = w.replace(/^\W+|\W+$/g,'');
+								w = w.replace(/^\W+/g,'');
 								p += (l-w.length);
+								w = w.replace(/\W+$/g,'');
 							}
 							if(matches[w]==undefined) matches[w] = [];
 							matches[w].push(p);
@@ -328,6 +332,26 @@ var querytext=(function(o){
 				if(matches) console.log(matches);
 			}
 			return this.opts.matches && ok ? matches : ok;
+		},
+		highlight: function(txt,bef,aft) {
+			if(!this.tree) return txt;
+			this.opts.matches = true;
+			var 
+				match = this.match(txt),
+				hl = [],
+				k, p;
+			for(k in match) match[k].forEach(function(p){ hl.push([p,k.length]) });
+			hl
+				.sort(function(a,b){ return b[0]>a[0] })
+				.forEach(function(m){
+					txt = 
+						txt.substr(0,m[0])+
+						bef+
+						txt.substr(m[0],m[1])+
+						aft+
+						txt.substr(m[0]+m[1]);
+				});
+			return txt;
 		}
 	};
 	if(o){
