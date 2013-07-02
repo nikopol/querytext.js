@@ -35,9 +35,9 @@ methods:
   dump();            //return a string dump of the query tree
                      //(called after match, its include each
                      // nodes results)
-  highlight('text','before','after') //highlight a text with the
-                     //query, inserting 'before' and 'after' each
-                     //matching node
+  highlight('text','before','after') //highlight a text with the query, inserting 
+                     //'before' and 'after' each matching node.
+                     //important: option "matches" must have been set for this function.
 
 usages:
 	
@@ -115,7 +115,7 @@ var querytext=(function(o){
 			.replace(/[ýÿ]/gm,'y')
 	},
 	qt = {
-		VERSION: 0.3,
+		VERSION: 0.4,
 		opts: {
 			dftbool: 'OR',
 			sensitive: false,
@@ -335,7 +335,7 @@ var querytext=(function(o){
 		},
 		highlight: function(txt,bef,aft) {
 			if(!this.tree) return txt;
-			this.opts.matches = true;
+			if(!this.opts.matches) return false;
 			var 
 				match = this.match(txt),
 				hl = [],
