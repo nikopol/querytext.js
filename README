@@ -31,8 +31,10 @@ querytext object methods:
   normalize();       //return the normalized query as string
   
   match('text');     //test if the text match the query
-                     //  if matches flag is true  => return { word:[pos1,pos2], ... } or false
-                     //  if matches flag is false => return true or false
+                     //if matches flag is true =>
+                     //    return { word:[pos1,pos2], ... } or false
+                     //if matches flag is false =>
+                     //     return true or false
   
   dump();            //return a string dump of the query tree
                      //(called after match, its include each
@@ -41,30 +43,38 @@ querytext object methods:
   highlight('text','before','after',ishtml)
                      //highlight a text with the query, inserting 
                      //'before' and 'after' around each matching node.
-                     //important: option "matches" must have been set for this function.
+                     //important: option "matches" must have been set
+                     //to use this function.
                      //return the text higlighted
   
   highlightml(DOMelement,'before','after')
                      //highlight a DOM tree with the query, inserting 
                      //'before' and 'after' around each matching node.
-                     //important: option "matches" must have been set for this function.
+                     //important: option "matches" must have been set
+                     //to use this function.
                      //return the DOMelement higlighted
 
 match usages:
   
-  querytext('!!tata').match('toto TaTa TITI'); //return true
+  querytext('!!tata').match('toto TaTa TITI'); //-> true
   querytext('--zaza').match('toto TaTa TITI'); //return false
-  querytext('NOT NOT zaza').match('toto ZaZa TITI'); //return true
+  querytext('NOT NOT zaza').match('toto ZaZa TITI'); //-> true
 
-  querytext('-tata').match('toto TaTa TITI'); //return false
+  querytext('-tata').match('toto TaTa TITI'); //-> false
 
-  querytext('toto AND "TATA TITI"').match('toto TaTa TITI'); //return true
-  querytext('toto +"TATA TITI"').match('toto TaTa TITI'); //return true
+  querytext('toto AND "TATA TITI"').match('toto TaTa TITI'); //-> true
+  querytext('toto +"TATA TITI"').match('toto TaTa TITI'); //-> true
+
+  querytext({
+    query: "T",
+    matches: true,
+    wholeword: false
+  }).match("toto") //-> {t:[0,2]}
 
 analysis usages:
 
-  var qt = querytext('toto AND (tata OR zizi)'); //return a querytext object
-  qt.match('toto TaTa TITI');  //return true
+  var qt = querytext('toto AND (tata OR zizi)'); //-> querytext object
+  qt.match('toto TaTa TITI');  //-> true
   console.log(qt.dump()); //output the following dump
 
   AND = true
@@ -73,22 +83,20 @@ analysis usages:
    |  | "tata" = true
    |  | "zizi"
 
-normaliszation usages:
+normalization usages:
 
-  querytext('toto tata').normalize() //return "toto OR tata"
-  querytext('toto -tata titi').normalize() //return "(toto AND NOT tata) OR titi"
-
-  querytext({query:"T",matches:true,wholeword:false}).match("toto") //return {t:[0,2]}
+  querytext('toto tata').normalize() //-> "toto OR tata"
+  querytext('to -ta ti').normalize() //-> "(to AND NOT ta) OR ti"
 
 highlight usages:
 
   querytext({query:"zob",matches:true})
     .highlight("<span class='zob'>zob</span>","[","]") 
-    //return "<span class='[zob]'>[zob]</span>"
+    //-> "<span class='[zob]'>[zob]</span>"
 
   querytext({query:"zob",matches:true})
     .highlight("<span class='zob'>zob</span>","[","]",true) 
-    //return "<span class='zob'>[zob]</span>"
+    //-> "<span class='zob'>[zob]</span>"
 
 =========================================================================
 LICENSE
