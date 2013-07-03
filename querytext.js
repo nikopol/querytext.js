@@ -9,7 +9,7 @@ supported query syntax:
   - NOT (including leading ! or - charaters),
   - parenthesis
   - left and right truncatures (with * character)
-  - quotes
+  - "quotes" for exact matching
 
 constructors:
 
