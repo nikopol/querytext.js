@@ -32,9 +32,9 @@ querytext object methods:
   
   match('text');     //test if the text match the query
                      //if matches flag is true =>
-                     //    return { word:[pos1,pos2], ... } or false
+                     //   return { word:[pos1,pos2], ... } or false
                      //if matches flag is false =>
-                     //     return true or false
+                     //   return true or false
   
   dump();            //return a string dump of the query tree
                      //(called after match, its include each

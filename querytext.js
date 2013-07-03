@@ -1,6 +1,6 @@
 /*
 querytext.js 0.5 (c) 2012-2013 niko
-test or higlight if a text/html match a boolean query
+test or highlight if a text/html match a boolean query
 
 supported query syntax:
 
@@ -14,9 +14,9 @@ supported query syntax:
 constructors:
 
   querytext()          // get empty querytext object
-  querytext("query")   // get querytext object with a parsed query
-  querytext({          // get an object object with options:
-    sensisitive: false,//   case sensitive (default=false)
+  querytext("query")   // get a querytext object with a parsed query
+  querytext({          // get a querytext object object with options:
+    sensitive: false,  //   case sensitive (default=false)
     wholeword: true,   //   whole word only (default=true)
     unaccent: true,    //   accent unsensitive (default=true)
     matches: false,    //   want matched words with their position
@@ -26,34 +26,34 @@ constructors:
 
 querytext object methods:
 
-  parse('query');    //return {error:"msg",pos:12} or the 
-                     //querytext object
+  parse('query');    // return {error:"msg",pos:12} or the 
+                     // querytext object
   
-  normalize();       //return the normalized query as string
+  normalize();       // return the normalized query as string
   
-  match('text');     //test if the text match the query
-                     //if matches flag is true =>
-                     //		return { word:[pos1,pos2], ... } or false
-                     //if matches flag is false =>
-                     //     return true or false
+  match('text');     // test if the text match the query
+                     // if matches flag is true =>
+                     //	   return { word:[pos1,pos2], ... } or false
+                     // if matches flag is false =>
+                     //    return true or false
   
-  dump();            //return a string dump of the query tree
-                     //(called after match, its include each
+  dump();            // return a string dump of the query tree
+                     // (called after match, its include each
                      // nodes results)
   
   highlight('text','before','after',ishtml)
-                     //highlight a text with the query, inserting 
-                     //'before' and 'after' around each matching node.
-                     //important: option "matches" must have been set
-                     //to use this function.
-                     //return the text higlighted
+                     // highlight a text with the query, inserting 
+                     // 'before' and 'after' around each matching node.
+                     // important: option "matches" must have been set
+                     // to use this function.
+                     // return the text higlighted
   
   highlightml(DOMelement,'before','after')
-                     //highlight a DOM tree with the query, inserting 
-                     //'before' and 'after' around each matching node.
-                     //important: option "matches" must have been set
-                     //to use this function.
-                     //return the DOMelement higlighted
+                     // highlight a DOM tree with the query, inserting 
+                     // 'before' and 'after' around each matching node.
+                     // important: option "matches" must have been set
+                     // to use this function.
+                     // return the DOMelement higlighted
 
 match usages:
 	
@@ -92,11 +92,11 @@ normalization usages:
 highlight usages:
 
   querytext({query:"zob",matches:true})
-    .highlight("<span class='zob'>zob</span>","[","]") 
+    .highlight("<span class='zob'>zob</span>","[","]");
     //-> "<span class='[zob]'>[zob]</span>"
 
   querytext({query:"zob",matches:true})
-    .highlight("<span class='zob'>zob</span>","[","]",true) 
+    .highlight("<span class='zob'>zob</span>","[","]",true);
     //-> "<span class='zob'>[zob]</span>"
 
 =========================================================================
