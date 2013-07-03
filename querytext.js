@@ -1,6 +1,6 @@
 /*
-querytext.js 0.4 (c) 2012-2013 niko
-test if a text match a boolean query
+querytext.js 0.5 (c) 2012-2013 niko
+test or higlight if a text/html match a boolean query
 
 supported query syntax:
 
@@ -22,35 +22,49 @@ constructors:
     matches: false,    //   want matched words with their position
     debug: false,      //   console debugging ouput (default=false)
     query: "query"     //   query string
-  })
+  })                   // return a querytext object
 
-methods:
+querytext object methods:
 
   parse('query');    //return {error:"msg",pos:12} or the 
                      //querytext object
+  
   normalize();       //return the normalized query as string
+  
   match('text');     //test if the text match the query
                      //  if matches flag is true  => return { word:[pos1,pos2], ... } or false
                      //  if matches flag is false => return true or false
+  
   dump();            //return a string dump of the query tree
                      //(called after match, its include each
                      // nodes results)
-  highlight('text','before','after') //highlight a text with the query, inserting 
-                     //'before' and 'after' each matching node.
+  
+  highlight('text','before','after',ishtml)
+                     //highlight a text with the query, inserting 
+                     //'before' and 'after' around each matching node.
                      //important: option "matches" must have been set for this function.
+                     //return the text higlighted
+  
+  highlightml(DOMelement,'before','after')
+                     //highlight a DOM tree with the query, inserting 
+                     //'before' and 'after' around each matching node.
+                     //important: option "matches" must have been set for this function.
+                     //return the DOMelement higlighted
 
-usages:
+match usages:
 	
   querytext('!!tata').match('toto TaTa TITI'); //return true
-  querytext('--zaza').match('toto TaTa TITI'); //return true
-  querytext('NOT NOT zaza').match('toto TaTa TITI');  //return true
+  querytext('--zaza').match('toto TaTa TITI'); //return false
+  querytext('NOT NOT zaza').match('toto ZaZa TITI'); //return true
 
   querytext('-tata').match('toto TaTa TITI'); //return false
 
   querytext('toto AND "TATA TITI"').match('toto TaTa TITI'); //return true
   querytext('toto +"TATA TITI"').match('toto TaTa TITI'); //return true
 
-  var qt = querytext('toto AND (tata OR zizi)'); //return an object
+analysis usages:
+
+  var qt = querytext('toto AND (tata OR zizi)'); //return a querytext object
   qt.match('toto TaTa TITI');  //return true
   console.log(qt.dump()); //output the following dump
 
@@ -60,10 +74,22 @@ usages:
    |  | "tata" = true
    |  | "zizi"
 
-  querytext('toto tata').normalize() //return "toto" OR "tata"
-  querytext('toto -tata titi').normalize() //return ("toto" AND NOT "tata") OR "titi"
+normaliszation usages:
+
+  querytext('toto tata').normalize() //return "toto OR tata"
+  querytext('toto -tata titi').normalize() //return "(toto AND NOT tata) OR titi"
 
   querytext({query:"T",matches:true,wholeword:false}).match("toto") //return {t:[0,2]}
+
+highlight usages:
+
+  querytext({query:"zob",matches:true})
+    .highlight("<span class='zob'>zob</span>","[","]") 
+    //return "<span class='[zob]'>[zob]</span>"
+
+  querytext({query:"zob",matches:true})
+    .highlight("<span class='zob'>zob</span>","[","]",true) 
+    //return "<span class='zob'>[zob]</span>"
 
 =========================================================================
 LICENSE
@@ -90,6 +116,9 @@ MODIFICATION :
 */
 
 var querytext=(function(o){
+
+	"use strict";
+
 	var
 	unaccent = function(t){
 		return t
@@ -114,8 +143,19 @@ var querytext=(function(o){
 			.replace(/[úûùü]/gm,'u')
 			.replace(/[ýÿ]/gm,'y')
 	},
+	lighton = function(match,txt,bef,aft) {
+		var k, p, hl=[];
+		for(k in match)
+			match[k].forEach(function(p){ hl.push([p,k.length]) });
+		hl
+			.sort(function(a,b){ return b[0]>a[0] })
+			.forEach(function(m){
+				txt = txt.substr(0,m[0])+bef+txt.substr(m[0],m[1])+aft+txt.substr(m[0]+m[1]);
+			});
+		return txt;
+	},
 	qt = {
-		VERSION: 0.4,
+		VERSION: 0.5,
 		opts: {
 			dftbool: 'OR',
 			sensitive: false,
@@ -333,25 +373,38 @@ var querytext=(function(o){
 			}
 			return this.opts.matches && ok ? matches : ok;
 		},
-		highlight: function(txt,bef,aft) {
-			if(!this.tree) return txt;
+		highlightml: function(node,bef,aft) {
+			if(!this.tree) return node;
 			if(!this.opts.matches) return false;
-			var 
-				match = this.match(txt),
+			var htm = node.innerHTML,
+				txt = "",
 				hl = [],
-				k, p;
-			for(k in match) match[k].forEach(function(p){ hl.push([p,k.length]) });
-			hl
-				.sort(function(a,b){ return b[0]>a[0] })
-				.forEach(function(m){
-					txt = 
-						txt.substr(0,m[0])+
-						bef+
-						txt.substr(m[0],m[1])+
-						aft+
-						txt.substr(m[0]+m[1]);
-				});
-			return txt;
+				k, p, match;
+			//mask html tags
+			for(k = 0, p=false; k<htm.length; ++k) {
+				if(!p) p = htm[k]=='<';
+				if(p) {
+					p = htm[k]!='>';
+					txt += ' ';
+				} else
+					txt += htm[k];
+			}
+			//matches
+			node.innerHTML = lighton(this.match(txt),htm,bef,aft);
+			return node;
+		},
+		highlight: function(txt,bef,aft,ishtml) {
+			if(typeof(txt)=='object')
+				return this.highlightml(txt,bef,aft);
+			else if (ishtml) {
+				var d = document.createElement('div');
+				d.innerHTML = txt;
+				return this.highlightml(d,bef,aft).innerHTML;
+			} else {
+				if(!this.tree) return txt;
+				if(!this.opts.matches) return false;
+				return lighton(this.match(txt),txt,bef,aft);
+			}
 		}
 	};
 	if(o){

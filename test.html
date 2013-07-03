@@ -92,6 +92,24 @@
 					r.innerHTML=q.highlight(_('#text').value,'<span class="highlight">','</span>');
 				}
 			}
+			_('#highlightml').onclick=function(){
+				var r=_('#result');
+				css(r,'-error').innerHTML='...';
+				var q=querytext({
+					debug: _('#debug').checked,
+					unaccent: _('#unaccent').checked,
+					sensitive: _('#sensitive').checked,
+					wholeword: _('#wholeword').checked,
+					matches: _('#match').checked,
+					query: _('#query').value
+				});
+				if(q.error){
+					css(r,'+error');
+					r.innerHTML=q.error+' at '+q.pos;
+				} else {
+					r.innerHTML=q.highlight(_('#text').value,'<span class="highlight">','</span>',true);
+				}
+			}
 		});
 	</script>
 </head>
@@ -117,6 +135,7 @@
 		<input id="search" type="button" value="search" />
 		<input id="normalize" type="button" value="normalize" />
 		<input id="highlight" type="button" value="highlight" />
+		<input id="highlightml" type="button" value="HTML highlight" />
 	</form>
 	<div id="result"></div>
 </body>
