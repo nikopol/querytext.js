@@ -152,9 +152,11 @@ var querytext=(function(o){
 			.replace(/[ýÿ]/gm,'y')
 	},
 	lighton = function(match,txt,bef,aft) {
-		var k, p, hl=[];
+		var k, p, hl=[], d={};
 		for(k in match)
-			match[k].forEach(function(p){ hl.push([p,k.length]) });
+			match[k].forEach(function(p){ if(!d[p] || d[p][1]<k.length) d[p]=[p,k.length] });
+		for(k in d) 
+			hl.push(d[k]);
 		hl
 			.sort(function(a,b){ return b[0]>a[0] })
 			.forEach(function(m){
