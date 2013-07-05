@@ -1,5 +1,5 @@
 querytext.js 0.5 (c) 2012-2013 niko
-test or higlight if a text/html match a boolean query
+test or highlight if a text/html matches a boolean query
 
 supported query syntax:
 
