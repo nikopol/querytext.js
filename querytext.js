@@ -158,7 +158,7 @@ var querytext=(function(o){
 		for(k in d) 
 			hl.push(d[k]);
 		hl
-			.sort(function(a,b){ return b[0]>a[0] })
+			.sort(function(a,b){ return b[0]-a[0] })
 			.forEach(function(m){
 				txt = txt.substr(0,m[0])+bef+txt.substr(m[0],m[1])+aft+txt.substr(m[0]+m[1]);
 			});
