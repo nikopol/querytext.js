@@ -1,4 +1,4 @@
-querytext.js 0.5 (c) 2012-2013 niko
+querytext.js 0.6 (c) 2012-2013 niko
 test or higlight if a text/html match a boolean query
 
 supported query syntax:

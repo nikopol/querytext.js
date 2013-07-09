@@ -1,5 +1,5 @@
 /*
-querytext.js 0.5 (c) 2012-2013 niko
+querytext.js 0.6 (c) 2012-2013 niko
 test or highlight if a text/html match a boolean query
 
 supported query syntax:
@@ -152,20 +152,48 @@ var querytext=(function(o){
 			.replace(/[ýÿ]/gm,'y')
 	},
 	lighton = function(match,txt,bef,aft) {
-		var k, p, hl=[], d={};
+		var k, i, n, p, e, x, l, hl=[];
+		//merge intersections
 		for(k in match)
-			match[k].forEach(function(p){ if(!d[p] || d[p][1]<k.length) d[p]=[p,k.length] });
-		for(k in d) 
-			hl.push(d[k]);
+			for(i in match[k]) {
+				x = false;
+				p = match[k][i];
+				l = k.length;
+				e = p+l-1;
+				for(n in hl) {
+					if(p>=hl[n].p && p<=hl[n].e) {
+						//start intersect
+						if(e>hl[n].e) {
+							hl[n].e = e;
+							hl[n].l = 1+e-hl[n].p;
+						}
+						x = true;
+					} else if(e>=hl[n].p && e<=hl[n].e) {
+						//end intersect
+						hl[n].p = p;
+						hl[n].l = 1+hl[n].e-p;
+						x = true;
+					} else if(p<hl[n].p && e>hl[n].e) {
+						//global intersect
+						hl[n].p = p;
+						hl[n].e = e;
+						hl[n].l = l;
+						x = true;
+					}
+				}
+				//no intersection, add it
+				if(!x) hl.push({p:p,l:l,e:e});
+			}
+		//highlight last first
 		hl
-			.sort(function(a,b){ return b[0]-a[0] })
+			.sort(function(a,b){ return b.p-a.p })
 			.forEach(function(m){
-				txt = txt.substr(0,m[0])+bef+txt.substr(m[0],m[1])+aft+txt.substr(m[0]+m[1]);
+				txt = txt.substr(0,m.p)+bef+txt.substr(m.p,m.l)+aft+txt.substr(m.p+m.l);
 			});
 		return txt;
 	},
 	qt = {
-		VERSION: 0.5,
+		VERSION: 0.6,
 		opts: {
 			dftbool: 'OR',
 			sensitive: false,
@@ -421,9 +449,10 @@ var querytext=(function(o){
 		if(typeof(o)=='string')
 			qt.parse(o);
 		else if(typeof(o)=='object') {
-			['debug','sensitive','wholeword','unaccent','matches'].forEach(function(n){
-				if(o[n]!==undefined) qt.opts[n]=o[n];
-			});
+			//merge options
+			for(var k in qt.opts)
+				if(o[k]!==undefined)
+					qt.opts[k]=o[k];
 			if(o.query) qt.parse(o.query);
 		}
 	}
