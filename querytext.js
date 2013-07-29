@@ -1,5 +1,5 @@
 /*
-querytext.js 0.6 (c) 2012-2013 niko
+querytext.js 0.7 (c) 2012-2013 niko
 test or highlight if a text/html match a boolean query
 
 supported query syntax:
@@ -295,7 +295,7 @@ var querytext=(function(o){
 					} else {                    //PARSE WORD
 						o = n;
 						t = '';
-						while( n < len && qry[n] > ' ' && !/[\(\)\+\-\|\!]/.test(qry[n]) ) t += qry[n++];
+						while( n < len && qry[n] > ' ' && !/[\(\)\+\-\|\!\"]/.test(qry[n]) ) t += qry[n++];
 						if( /^(AND|OR|NOT|NEAR\d)$/i.test(t) ) { //booleans
 							op = o;
 							var b = RegExp.$1.toUpperCase();
