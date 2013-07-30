@@ -130,23 +130,23 @@ var querytext=(function(o){
 	var
 	unaccent = function(t){
 		return t
-			.replace(/Æ/gm,'AE')
+			//.replace(/Æ/gm,'AE')
 			.replace(/[ÁÂÀÅÃÄ]/gm,'A')
 			.replace(/Ç/gm,'C')
 			.replace(/[ÉÊÈË]/gm,'E')
 			.replace(/[ÍÎÌÏ]/gm,'I')
 			.replace(/Ñ/gm,'N')
-			.replace(/Œ/gm,'OE')
+			//.replace(/Œ/gm,'OE')
 			.replace(/[ÓÔÒØÕÖ]/gm,'O')
 			.replace(/[ÚÛÙÜ]/gm,'U')
 			.replace(/Ý/gm,'Y')
-			.replace(/æ/gm,'ae')
+			//.replace(/æ/gm,'ae')
 			.replace(/[áâàåãä]/gm,'a')
 			.replace(/ç/gm,'c')
 			.replace(/[éêèë]/gm,'e')
 			.replace(/[íîìï]/gm,'i')
 			.replace(/ñ/gm,'n')
-			.replace(/œ/gm,'oe')
+			//.replace(/œ/gm,'oe')
 			.replace(/[óôòøõö]/gm,'o')
 			.replace(/[úûùü]/gm,'u')
 			.replace(/[ýÿ]/gm,'y')
@@ -254,6 +254,7 @@ var querytext=(function(o){
 						t = '';
 						while( n < len && qry[n] != '"' ) t += qry[n++];
 						if( n >= len ) return {error:'unbalanced quotes',pos:o+offset};
+						if( !t.length ) return {error:'empty quotes',pos:o+offset};
 						add_branch({ text: t });
 						n++;
 					} else if( qry[n] == ')' ) { //PARSE PARENTHESIS
