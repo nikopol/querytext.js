@@ -26,7 +26,7 @@ constructors:
 
 querytext object methods:
 
-  parse('query');    // return {error:"msg",pos:12} or the 
+  parse('query');    // return {error:"msg",pos:12} or the
                      // querytext object
   
   normalize();       // return the normalized query as string
@@ -42,21 +42,21 @@ querytext object methods:
                      // nodes results)
   
   highlight('text','before','after',ishtml)
-                     // highlight a text with the query, inserting 
+                     // highlight a text with the query, inserting
                      // 'before' and 'after' around each matching node.
                      // important: option "matches" must have been set
                      // to use this function.
                      // return the text higlighted
   
   highlightml(DOMelement,'before','after')
-                     // highlight a DOM tree with the query, inserting 
+                     // highlight a DOM tree with the query, inserting
                      // 'before' and 'after' around each matching node.
                      // important: option "matches" must have been set
                      // to use this function.
                      // return the DOMelement higlighted
 
 match usages:
-	
+
   querytext('!!tata').match('toto TaTa TITI'); //-> true
   querytext('--zaza').match('toto TaTa TITI'); //return false
   querytext('NOT NOT zaza').match('toto ZaZa TITI'); //-> true
@@ -107,16 +107,16 @@ DO WHAT THE FUCK YOU WANT WITH
 ESPECIALLY IF YOU OFFER ME A BEER
 PUBLIC LICENSE
 Version 1, March 2012
- 
+
 Copyright (C) 2012 - niko
- 
+
 Everyone is permitted to copy and distribute verbatim 
 or modified copies of this license document, and 
 changing it is allowed as long as the name is changed.
 
 DO WHAT THE FUCK YOU WANT TO PUBLIC
 ESPECIALLY IF YOU OFFER ME A BEER LICENSE
-TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND 
+TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND
 MODIFICATION :
 - You just DO WHAT THE FUCK YOU WANT.
 - Especially if you offer me a beer.
@@ -239,7 +239,7 @@ var querytext=(function(o){
 						if(src) node.src = src;
 						if(root) {
 							if(!mode) mode = opts.dftbool;
-							if(mode===root.bool && not===(root.not||false)) 
+							if(mode===root.bool && not===(root.not||false))
 								root.subs.push(node);
 							else
 								root = { bool: mode, subs: [ root, node ] };
@@ -314,7 +314,7 @@ var querytext=(function(o){
 				if( not || mode ) return {error:'unexpected operator',pos:op+offset};
 				return root ? root : {error:'empty query',pos:offset};
 			};
-			this.error = 
+			this.error =
 			this.tree  = false;
 			this.query = this.opts.unaccent ? unaccent(q) : q;
 			var b = parse_branch( this.query, 0, this.opts );
@@ -326,7 +326,7 @@ var querytext=(function(o){
 			} else {
 				this.tree = b;
 				if(this.opts.debug) console.log(this.dump());
-			} 
+			}
 			return this;
 		},
 		dump: function(node,ind){
@@ -362,7 +362,7 @@ var querytext=(function(o){
 		match: function(txt){
 			if(!this.tree) return false;
 			var
-				self = this, 
+				self = this,
 				reset_node = function(node){
 					delete node.match;
 					if( node.bool )
