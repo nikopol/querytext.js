@@ -1,5 +1,5 @@
 /*
-querytext.js 0.7 (c) 2012-2013 niko
+querytext.js 0.8 (c) 2012-2013 niko
 test or highlight if a text/html match a boolean query
 
 supported query syntax:
@@ -193,7 +193,7 @@ var querytext=(function(o){
 		return txt;
 	},
 	qt = {
-		VERSION: 0.6,
+		VERSION: 0.8,
 		opts: {
 			dftbool: 'OR',
 			sensitive: false,
@@ -254,7 +254,7 @@ var querytext=(function(o){
 						t = '';
 						while( n < len && qry[n] != '"' ) t += qry[n++];
 						if( n >= len ) return {error:'unbalanced quotes',pos:o+offset};
-						if( !t.length ) return {error:'empty quotes',pos:o+offset};
+						if( !t.length || t=='*' ) return {error:'empty quotes',pos:o+offset};
 						add_branch({ text: t });
 						n++;
 					} else if( qry[n] == ')' ) { //PARSE PARENTHESIS
@@ -307,7 +307,9 @@ var querytext=(function(o){
 							} else {
 								mode = b;
 							}
-						} else
+						} else if( t == '*' )
+							return {error:'empty word',pos:o+offset};
+						else
 							add_branch({ text:t });
 					}
 				}
