@@ -1,9 +1,9 @@
 [![Build Status](https://travis-ci.org/ZorGleH/querytext.js.png)](https://travis-ci.org/ZorGleH/querytext.js)
 
-querytext.js 0.7 (c) 2012-2013 niko
+querytext.js 0.8 (c) 2012-2013 niko
 ===================================
 
-*test or highlight if a text/html matches a boolean query*
+**test or highlight if a text/html matches a boolean query**
 
 supported query syntax:
 
