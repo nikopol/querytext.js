@@ -1,8 +1,13 @@
 {
   "name": "querytext.js",
   "version": "0.8",
+  "description": "test or highlight if a text/html matches a boolean query",
+  "author": "niko",
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-qunit": "~0.3.0"
+  },
+  "scripts": {
+    "test": "grunt ci"
   }
 }
