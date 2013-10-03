@@ -1,14 +1,31 @@
 {
   "name": "querytext.js",
-  "version": "0.8",
+  "version": "0.0.8",
   "description": "test or highlight if a text/html matches a boolean query",
-  "author": "niko",
-  "devDependencies": {
-    "grunt": "~0.4.1",
-    "grunt-contrib-qunit": "~0.3.0",
-    "grunt-cli": "~0.1.9"
+  "main": "Gruntfile.js",
+  "directories": {
+    "test": "test"
   },
+  "dependencies": {
+    "grunt-cli": "~0.1.9",
+    "grunt-contrib-qunit": "~0.3.0",
+    "grunt": "~0.4.1"
+  },
+  "devDependencies": {},
   "scripts": {
     "test": "grunt ci"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ZorGleH/querytext.js.git"
+  },
+  "keywords": [
+    "query",
+    "text",
+    "javascript",
+    "js",
+    "querytext"
+  ],
+  "author": "niko",
+  "license": "WTFPL"
 }
