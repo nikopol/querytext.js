@@ -146,7 +146,6 @@ var querytext=(function(o){
 			.replace(/[éêèë]/gm,'e')
 			.replace(/[íîìï]/gm,'i')
 			.replace(/ñ/gm,'n')
-			//.replace(/œ/gm,'oe')
 			.replace(/[óôòøõö]/gm,'o')
 			.replace(/[úûùü]/gm,'u')
 			.replace(/[ýÿ]/gm,'y')
@@ -394,6 +393,7 @@ var querytext=(function(o){
 								w = w.replace(/^\W+/g,'');
 								p += (l-w.length);
 								w = w.replace(/\W+$/g,'');
+								if(l>1) node.rex.lastIndex--;
 							}
 							if(matches[w]==undefined) matches[w] = [];
 							matches[w].push(p);
