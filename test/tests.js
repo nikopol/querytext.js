@@ -120,6 +120,15 @@ test('highlight', function () {
     'should highlight all words with accents'
   );
 
+  // Chinese
+  qt.parse('转发');
+  text = '央广网北京10月14日消息(记者马文佳)据中国之声《新闻晚高峰》报道，《光明日报》昨天刊发了中国科学院院士、北京大学神经科学研究所名誉所长韩济生的文章名字叫做《在过度医疗背后》。这篇文章引起了各大媒体的相继转发。';
+  equal(
+    qt.highlight(text, '<i>', '</i>'),
+    '央广网北京10月14日消息(记者马文佳)据中国之声《新闻晚高峰》报道，《光明日报》昨天刊发了中国科学院院士、北京大学神经科学研究所名誉所长韩济生的文章名字叫做《在过度医疗背后》。这篇文章引起了各大媒体的相继<i>转发</i>。',
+    'should highlight "转发"'
+  );
+
   // Double UTF chars
   // Not ready yet, one day maybe...
   //
