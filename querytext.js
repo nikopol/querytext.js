@@ -1,5 +1,7 @@
+// querytext.js 0.9 (c) 2012-2013 niko 
+// https://github.com/nikopol/querytext.js
+
 /*
-querytext.js 0.9 (c) 2012-2013 niko
 test or highlight if a text/html match a boolean query
 
 supported query syntax:
@@ -96,7 +98,7 @@ highlight usages:
     //-> "<span class='[zob]'>[zob]</span>"
 
   querytext({query:"zob",matches:true})
-    .highlight("<span class='zob'>zob</span>","[","]",true);
+    .highlightml("<span class='zob'>zob</span>","[","]");
     //-> "<span class='zob'>[zob]</span>"
 
 =========================================================================
