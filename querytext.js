@@ -1,5 +1,5 @@
 /*
-querytext.js 0.8 (c) 2012-2013 niko
+querytext.js 0.9 (c) 2012-2013 niko
 test or highlight if a text/html match a boolean query
 
 supported query syntax:
@@ -223,8 +223,8 @@ var querytext=(function(o){
 						if(node.text){
 							var txt = node.text.replace(/(^\s+|\s+$)/gm,'');
 							//set truncatures
-							var ltrunc = (txt[0] == '*' || !opts.wholeword) ? '' : '(^|\\W:?)';
-							var rtrunc = (txt.substr(-1) == '*' || !opts.wholeword) ? '' : '($|\\W:?)';
+							var ltrunc = (txt[0] == '*' || !opts.wholeword) ? '' : '(^|[\\s,;:\\-+=<>\\\\\\/\'"\\(\\)~&\\[\\]{}》《，]:?)';
+							var rtrunc = (txt.substr(-1) == '*' || !opts.wholeword) ? '' : '($|[\\s,;:\\-+=<>\\\\\\/\'"\\(\\)~&\\[\\]{}》《，]:?)';
 							txt = txt.replace(/(^\*|\*$)/g,'');
 							//escape special regexp chars
 							txt = txt.replace(/([\(\)\+\*\?\:\[\]])/g,"\\$1");
@@ -390,9 +390,9 @@ var querytext=(function(o){
 								w = w.toLowerCase();
 							if( self.opts.wholeword ){
 								l = w.length;
-								w = w.replace(/^\W+/g,'');
+								w = w.replace(/^[\s,;:\-+=<>\\\/'"\(\)~&\[\]{}》《，]+/g,'');
 								p += (l-w.length);
-								w = w.replace(/\W+$/g,'');
+								w = w.replace(/[\s,;:\-+=<>\\\/'"\(\)~&\[\]{}》《，]+$/g,'');
 								if(l>1) node.rex.lastIndex--;
 							}
 							if(matches[w]==undefined) matches[w] = [];
