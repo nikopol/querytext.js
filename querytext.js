@@ -225,8 +225,8 @@ var querytext=(function(o){
 						var
 							txt = text.replace(/(^\s+|\s+$)/gm,''),
 							//set truncatures
-							ltrunc = (txt[0] == '*' || !opts.wholeword) ? '' : '(^|[\\s,;:\\-+=<>\\\\\\/\'"\\(\\)~&\\[\\]{}》《，]:?)',
-							rtrunc = (txt.substr(-1) == '*' || !opts.wholeword) ? '' : '($|[\\s,;:\\-+=<>\\\\\\/\'"\\(\\)~&\\[\\]{}》《，]:?)';
+							ltrunc = (txt[0] == '*' || !opts.wholeword) ? '' : '(^|[\\s\.,;:\\-+=<>\\\\\\/\'"\\(\\)~&\\[\\]{}》《，]:?)',
+							rtrunc = (txt.substr(-1) == '*' || !opts.wholeword) ? '' : '($|[\\s\.,;:\\-+=<>\\\\\\/\'"\\(\\)~&\\[\\]{}》《，]:?)';
 						txt = txt.replace(/(^\*|\*$)/g,'');
 						//escape special regexp chars
 						txt = txt.replace(/([\(\)\+\*\?\:\[\]])/g,"\\$1");
