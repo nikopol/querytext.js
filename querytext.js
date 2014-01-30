@@ -270,7 +270,6 @@ var querytext=(function(o){
 							while( n < len && qry[n] >= '0' && qry[n] <='9' ) d += qry[n++];
 							if( !d.length ) return {error:'proximity distance missing',pos:o+offset};
 							d = parseInt(d,10);
-							if(d>50) return {error:'proximity distance too big',pos:o+offset};
 							b = { bool: 'NEAR', dist: d, subs: [] };
 							t.split(/\s+/).forEach(function(w){
 								b.subs.push({
@@ -486,16 +485,12 @@ var querytext=(function(o){
 				    w = 0,
 				    l = txt.length,
 				    wchar = /^[\-0-9A-Za-z\u00C0-\u017F]+$/;
-				while( n<l ) {
-					if(txt[n] == '.') {
-						w += 100; //sentence trick
-						n++;
-					} else if(wchar.test(txt[n])) {
+				while( n<l )
+					if(wchar.test(txt[n])) {
 						wordidx[n] = w++;
 						while( ++n<l && wchar.test(txt[n]) );
 					} else
-						while( ++n<l && !(txt[n]=='.' || wchar.test(txt[n]) ));
-				}
+						while( ++n<l && !wchar.test(txt[n]) );
 			}
 			reset_node( this.tree );
 			ok = node_match( this.tree, this.opts.unaccent ? unaccent(txt) : txt );
