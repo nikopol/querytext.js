@@ -12,7 +12,8 @@ supported query syntax:
   - parenthesis
   - left and right truncatures (with * character)
   - "quotes" for exact matching
-  - near with syntax "word1 word2 ... wordx"~4
+  - "word1 word2"~x
+    to search word1 a x words of distance from word2 
 
 constructors:
 
@@ -154,44 +155,46 @@ var querytext=(function(o){
 			.replace(/[ýÿ]/gm,'y')
 	},
 	lighton = function(match,txt,bef,aft) {
-		var hl = [];
-		//merge intersections
-		match.forEach(function(m){
-			var
-				x = false,
-				p = m.ofs,
-				l = m.txt.length,
-				e = p+l-1;
-			for(var n in hl) {
-				if( p>=hl[n].p && p<=hl[n].e ) {
-					//start intersect
-					if(e>hl[n].e) {
+		if(match) {
+			var hl = [];
+			//merge intersections
+			match.forEach(function(m){
+				var
+					x = false,
+					p = m.ofs,
+					l = m.txt.length,
+					e = p+l-1;
+				for(var n in hl) {
+					if( p>=hl[n].p && p<=hl[n].e ) {
+						//start intersect
+						if(e>hl[n].e) {
+							hl[n].e = e;
+							hl[n].l = 1+e-hl[n].p;
+						}
+						x = true;
+					} else if( e>=hl[n].p && e<=hl[n].e ) {
+						//end intersect
+						hl[n].p = p;
+						hl[n].l = 1+hl[n].e-p;
+						x = true;
+					} else if( p<hl[n].p && e>hl[n].e ) {
+						//global intersect
+						hl[n].p = p;
 						hl[n].e = e;
-						hl[n].l = 1+e-hl[n].p;
+						hl[n].l = l;
+						x = true;
 					}
-					x = true;
-				} else if( e>=hl[n].p && e<=hl[n].e ) {
-					//end intersect
-					hl[n].p = p;
-					hl[n].l = 1+hl[n].e-p;
-					x = true;
-				} else if( p<hl[n].p && e>hl[n].e ) {
-					//global intersect
-					hl[n].p = p;
-					hl[n].e = e;
-					hl[n].l = l;
-					x = true;
 				}
-			}
-			//no intersection, add it
-			if(!x) hl.push({p:p,l:l,e:e});
-		});
-		//highlight last first
-		hl
-			.sort(function(a,b){ return b.p-a.p })
-			.forEach(function(m){
-				txt = txt.substr(0,m.p)+bef+txt.substr(m.p,m.l)+aft+txt.substr(m.p+m.l);
+				//no intersection, add it
+				if(!x) hl.push({p:p,l:l,e:e});
 			});
+			//highlight last first
+			hl
+				.sort(function(a,b){ return b.p-a.p })
+				.forEach(function(m){
+					txt = txt.substr(0,m.p)+bef+txt.substr(m.p,m.l)+aft+txt.substr(m.p+m.l);
+				});
+		}
 		return txt;
 	},
 	qt = {
@@ -416,7 +419,7 @@ var querytext=(function(o){
 						d = Math.abs(p.pos - pos);
 						if( d<min ) min = d;
 					});
-					return min;
+					return min-1;
 				},
 				node_match = function(node, text){
 					var ok, i, j, k, n, w, p, l;

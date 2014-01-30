@@ -13,7 +13,8 @@ supported query syntax:
   - parenthesis
   - left and right truncatures (with * character)
   - "quotes" for exact matching
-  - near with syntax "word1 word2 ... wordx"~4  
+  - "word1 word2"~x
+    to search word1 a x words of distance from word2 
 
 constructors:
 
