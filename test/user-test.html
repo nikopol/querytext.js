@@ -50,7 +50,7 @@
 					var v = _('#text').value;
 					var z = q.match(v);
 					var h = z ? "match!" : "don't match";
-					if(_('#match').checked) {
+					if(_('#match').checked && z) {
 						h += '<table><tr><th>word<th>offset<th>num';
 						z.forEach(function(k){
 							h += '<tr><td>'+k.txt+'<td>'+k.ofs;
