@@ -1,4 +1,4 @@
-// querytext.js 0.9 (c) 2012-2013 niko 
+// querytext.js 1.0 (c) 2012-2014 niko 
 // https://github.com/nikopol/querytext.js
 
 /*
@@ -12,6 +12,7 @@ supported query syntax:
   - parenthesis
   - left and right truncatures (with * character)
   - "quotes" for exact matching
+  - near with syntax "word1 word2 ... wordx"~4
 
 constructors:
 
@@ -153,38 +154,38 @@ var querytext=(function(o){
 			.replace(/[ýÿ]/gm,'y')
 	},
 	lighton = function(match,txt,bef,aft) {
-		var k, i, n, p, e, x, l, hl=[];
+		var hl = [];
 		//merge intersections
-		for(k in match)
-			for(i in match[k]) {
-				x = false;
-				p = match[k][i];
-				l = k.length;
+		match.forEach(function(m){
+			var
+				x = false,
+				p = m.ofs,
+				l = m.txt.length,
 				e = p+l-1;
-				for(n in hl) {
-					if(p>=hl[n].p && p<=hl[n].e) {
-						//start intersect
-						if(e>hl[n].e) {
-							hl[n].e = e;
-							hl[n].l = 1+e-hl[n].p;
-						}
-						x = true;
-					} else if(e>=hl[n].p && e<=hl[n].e) {
-						//end intersect
-						hl[n].p = p;
-						hl[n].l = 1+hl[n].e-p;
-						x = true;
-					} else if(p<hl[n].p && e>hl[n].e) {
-						//global intersect
-						hl[n].p = p;
+			for(var n in hl) {
+				if( p>=hl[n].p && p<=hl[n].e ) {
+					//start intersect
+					if(e>hl[n].e) {
 						hl[n].e = e;
-						hl[n].l = l;
-						x = true;
+						hl[n].l = 1+e-hl[n].p;
 					}
+					x = true;
+				} else if( e>=hl[n].p && e<=hl[n].e ) {
+					//end intersect
+					hl[n].p = p;
+					hl[n].l = 1+hl[n].e-p;
+					x = true;
+				} else if( p<hl[n].p && e>hl[n].e ) {
+					//global intersect
+					hl[n].p = p;
+					hl[n].e = e;
+					hl[n].l = l;
+					x = true;
 				}
-				//no intersection, add it
-				if(!x) hl.push({p:p,l:l,e:e});
 			}
+			//no intersection, add it
+			if(!x) hl.push({p:p,l:l,e:e});
+		});
 		//highlight last first
 		hl
 			.sort(function(a,b){ return b.p-a.p })
@@ -201,7 +202,8 @@ var querytext=(function(o){
 			wholeword: true,
 			unaccent: true,
 			matches: false,
-			debug: false
+			debug: false,
+			wordpos: false
 		},
 		error: false,
 		query: false,
@@ -215,28 +217,30 @@ var querytext=(function(o){
 					not = false,
 					mode = false,
 					len = qry.length,
-					o, op, q, t, p, root,
+					o, op, q, t, p, b, d, root,
+					text_rex = function(text){
+						var
+							txt = text.replace(/(^\s+|\s+$)/gm,''),
+							//set truncatures
+							ltrunc = (txt[0] == '*' || !opts.wholeword) ? '' : '(^|[\\s,;:\\-+=<>\\\\\\/\'"\\(\\)~&\\[\\]{}》《，]:?)',
+							rtrunc = (txt.substr(-1) == '*' || !opts.wholeword) ? '' : '($|[\\s,;:\\-+=<>\\\\\\/\'"\\(\\)~&\\[\\]{}》《，]:?)';
+						txt = txt.replace(/(^\*|\*$)/g,'');
+						//escape special regexp chars
+						txt = txt.replace(/([\(\)\+\*\?\:\[\]])/g,"\\$1");
+						//concats spaces
+						txt = txt.replace(/\s+/g,'\\s+');
+						return new RegExp(
+							ltrunc+txt+rtrunc,
+							'm'+(opts.sensitive?'':'i')+(opts.matches?'g':'')
+						);
+					},
 					add_branch = function(node,src){
 						if(not){
 							node.not = true;
 							if(!mode) mode = 'AND';
 							not = false;
 						}
-						if(node.text){
-							var txt = node.text.replace(/(^\s+|\s+$)/gm,'');
-							//set truncatures
-							var ltrunc = (txt[0] == '*' || !opts.wholeword) ? '' : '(^|[\\s,;:\\-+=<>\\\\\\/\'"\\(\\)~&\\[\\]{}》《，]:?)';
-							var rtrunc = (txt.substr(-1) == '*' || !opts.wholeword) ? '' : '($|[\\s,;:\\-+=<>\\\\\\/\'"\\(\\)~&\\[\\]{}》《，]:?)';
-							txt = txt.replace(/(^\*|\*$)/g,'');
-							//escape special regexp chars
-							txt = txt.replace(/([\(\)\+\*\?\:\[\]])/g,"\\$1");
-							//concats spaces
-							txt = txt.replace(/\s+/g,'\\s+');
-							node.rex = new RegExp(
-								ltrunc+txt+rtrunc,
-								'm'+(opts.sensitive?'':'i')+(opts.matches?'g':'')
-							);
-						}
+						if(node.text) node.rex = text_rex(node.text);
 						if(src) node.src = src;
 						if(root) {
 							if(!mode) mode = opts.dftbool;
@@ -256,8 +260,26 @@ var querytext=(function(o){
 						while( n < len && qry[n] != '"' ) t += qry[n++];
 						if( n >= len ) return {error:'unbalanced quotes',pos:o+offset};
 						if( !t.length || t=='*' ) return {error:'empty quotes',pos:o+offset};
-						add_branch({ text: t });
 						n++;
+						if( n < len && qry[n] == '~' ) { //QUOTED NEAR
+							n++;
+							d = '';
+							while( n < len && qry[n] >= '0' && qry[n] <='9' ) d += qry[n++];
+							if( !d.length ) return {error:'proximity distance missing',pos:o+offset};
+							d = parseInt(d,10);
+							if(d>50) return {error:'proximity distance too big',pos:o+offset};
+							b = { bool: 'NEAR', dist: d, subs: [] };
+							t.split(/\s+/).forEach(function(w){
+								b.subs.push({
+									text: w,
+									rex: text_rex(w)
+								})
+							});
+							add_branch(b);
+							opts.wordpos = 
+							opts.matches = true;
+						} else
+							add_branch({ text: t });
 					} else if( qry[n] == ')' ) { //PARSE PARENTHESIS
 						return {error:'unbalanced parenthesis',pos:o+offset};
 					} else if( qry[n] == '(' ) {
@@ -298,7 +320,7 @@ var querytext=(function(o){
 						o = n;
 						t = '';
 						while( n < len && qry[n] > ' ' && !/[\(\)\+\-\|\!\"]/.test(qry[n]) ) t += qry[n++];
-						if( /^(AND|OR|NOT|NEAR\d)$/i.test(t) ) { //booleans
+						if( /^(AND|OR|NOT)$/i.test(t) ) { //booleans
 							op = o;
 							var b = RegExp.$1.toUpperCase();
 							if( b == 'NOT' ) {
@@ -339,10 +361,11 @@ var querytext=(function(o){
 			var
 				not = node.not ? 'NOT ' : '',
 				src = node.src ? ' : '+not+'('+node.src+')' : '',
+				dst = node.dist!=undefined ? '('+node.dist+') ' : '',
 				hit = node.match!=undefined ? ' = '+node.match : '';
 				self = this;
 			return node.bool
-				? ind+not+node.bool+hit+src+"\n"+node.subs.map(function(n){ return self.dump(n,ind+' | ') }).join("\n")
+				? ind+not+node.bool+dst+hit+src+"\n"+node.subs.map(function(n){ return self.dump(n,ind+' | ') }).join("\n")
 				: ind+not+'"'+node.text+'"'+hit;
 		},
 		normalize: function(node){
@@ -351,12 +374,17 @@ var querytext=(function(o){
 			var
 				not = node.not ? 'NOT ' : '',
 				lst = [],
-				self = this;
+				self = this, t;
 			if( node.bool ) {
-				node.subs.forEach(function(n){ lst.push(self.normalize(n)) });
-				return (not || node != this.tree)
-					? not+'('+lst.join(' '+node.bool+' ')+')'
-					: lst.join(' '+node.bool+' ');
+				if( node.bool == 'NEAR' ) {
+					t = node.subs.map(function(n){ return n.text }).join(' ');
+					return not+'"'+t+'"~'+node.dist;
+				} else {
+					node.subs.forEach(function(n){ lst.push(self.normalize(n)) });
+					return (not || node != this.tree)
+						? not+'('+lst.join(' '+node.bool+' ')+')'
+						: lst.join(' '+node.bool+' ');
+				}
 			}
 			return /^(and|or|not)$/i.test(node.text) || /[\s\(\)\+\-\!\?\|]/.test(node.text)
 				? not+'"'+node.text+'"'
@@ -366,39 +394,75 @@ var querytext=(function(o){
 			if(!this.tree) return false;
 			var
 				self = this,
+				matches = this.opts.matches ? [] : false,
+				wordidx = this.opts.wordpos ? {} : false,
 				reset_node = function(node){
 					delete node.match;
+					delete node.pos;
 					if( node.bool )
 						node.subs.forEach(function(n){ reset_node(n) });
 				},
-				node_match = function(node, text, matches){
-					var ok, i, w, p, l;
+				wordpos = function(o){
+					if( wordidx[o]==undefined ) {
+						var i = 0;
+						while( i<wordidx.length && wordidx[i]<o ) i++;
+						return i>0 ? wordidx[i-1] : 0;
+					} else
+						return wordidx[o];
+				},
+				mindist = function(pos,node) {
+					var d, min = Number.MAX_VALUE;
+					node.pos.forEach(function(p){
+						d = Math.abs(p.pos - pos);
+						if( d<min ) min = d;
+					});
+					return min;
+				},
+				node_match = function(node, text){
+					var ok, i, j, k, n, w, p, l;
 					if( node.bool ) {
-						if(node.bool == 'AND')
+						if( node.bool == 'NEAR' ) {
+							for(ok=true,l=node.subs.length,i=0;i<l && ok;++i)
+								ok = node_match(node.subs[i],text);
+							if(ok) {
+								for(i=0; i<l && ok; ++i) {
+									n = node.subs[i];
+									n.pos = n.pos.filter(function(p){
+										for(j=0; j<l; ++j)
+											if( j!=i && mindist(p.pos,node.subs[j])<=node.dist )
+												return true;
+										return false;
+									});
+									ok = n.pos.length;
+								}
+							}
+						} else if( node.bool == 'AND' )
 							for(ok=true,i=0;i<node.subs.length && ok;++i)
-								ok = node_match(node.subs[i],text,matches);
+								ok = node_match(node.subs[i],text);
 						else
 							for(ok=false,i=0;i<node.subs.length;++i){
-								ok = node_match(node.subs[i],text,matches) || ok;
+								ok = node_match(node.subs[i],text) || ok;
 								if(ok && !matches) break;
 							}
-					} else if( matches!==false && !node.not ) {
+					} else if( matches && !node.not ) {
 						ok = false;
+						node.pos = [];
 						while((i = node.rex.exec(text)) != null){
 							ok = true;
 							w = i[0];
 							p = i.index;
-							if( !self.opts.sensitive )
+							if(!self.opts.sensitive)
 								w = w.toLowerCase();
-							if( self.opts.wholeword ){
+							if(self.opts.wholeword){
 								l = w.length;
 								w = w.replace(/^[\s,;:\-+=<>\\\/'"\(\)~&\[\]{}》《，]+/g,'');
 								p += (l-w.length);
 								w = w.replace(/[\s,;:\-+=<>\\\/'"\(\)~&\[\]{}》《，]+$/g,'');
 								if(l>1) node.rex.lastIndex--;
 							}
-							if(matches[w]==undefined) matches[w] = [];
-							matches[w].push(p);
+							p = { txt:w, ofs:p };
+							if(wordidx) p.pos = wordpos(p.ofs);
+							node.pos.push(p);
 						}
 					} else
 						ok = node.rex.test( text );
@@ -406,31 +470,53 @@ var querytext=(function(o){
 					node.match = ok;
 					return ok;
 				},
-				ok,
-				matches = this.opts.matches ? {} : false;
-			reset_node( this.tree );
-			ok = node_match( this.tree, this.opts.unaccent ? unaccent(txt) : txt, matches );
-			if(this.opts.debug) {
-				console.log(this.dump());
-				if(matches) console.log(matches);
+				get_matches = function(node) {
+					if( node.bool ) node.subs.forEach(function(n){ get_matches(n) });
+					else if( node.pos ) node.pos.forEach(function(p){ matches.push(p) });
+					return matches;
+				},
+				ok;
+			if( wordidx ) {
+				//NEAR spotted, need to calc wordidx
+				var
+					n = 0, 
+				    w = 0,
+				    l = txt.length,
+				    wchar = /^[\-0-9A-Za-z\u00C0-\u017F]+$/;
+				while( n<l ) {
+					if(txt[n] == '.') {
+						w += 100; //sentence trick
+						n++;
+					} else if(wchar.test(txt[n])) {
+						wordidx[n] = w++;
+						while( ++n<l && wchar.test(txt[n]) );
+					} else
+						while( ++n<l && !(txt[n]=='.' || wchar.test(txt[n]) ));
+				}
 			}
-			return this.opts.matches && ok ? matches : ok;
+			reset_node( this.tree );
+			ok = node_match( this.tree, this.opts.unaccent ? unaccent(txt) : txt );
+			if(this.opts.debug) console.log(this.dump());
+			if(ok && matches) return get_matches(this.tree);
+			return ok;
 		},
 		highlightml: function(node,bef,aft) {
 			if(!this.tree) return node;
 			if(!this.opts.matches) return false;
-			var htm = node.innerHTML,
+			var
+				htm = node.innerHTML,
 				txt = "",
-				hl = [],
-				k, p, match;
+				k = 0,
+				p = false;
 			//mask html tags
-			for(k = 0, p=false; k<htm.length; ++k) {
+			while(k<htm.length) {
 				if(!p) p = htm[k]=='<';
 				if(p) {
 					p = htm[k]!='>';
 					txt += ' ';
 				} else
 					txt += htm[k];
+				k++;
 			}
 			//matches
 			node.innerHTML = lighton(this.match(txt),htm,bef,aft);
