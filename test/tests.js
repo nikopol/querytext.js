@@ -4,11 +4,10 @@ test('highlight', function () {
 
   var text, qt;
 
-  qt = querytext({
-    matches: true
-  });
+  qt = querytext();
 
-  // First test
+/*1*/
+
   qt.parse('foo OR bar');
   text = 'foo bar';
   equal(
@@ -17,7 +16,8 @@ test('highlight', function () {
     'should highlight "foo" and "bar"'
   );
 
-  // Second test
+/*2*/
+
   qt.parse('bar');
   text = 'foo bar bart';
   equal(
@@ -25,6 +25,8 @@ test('highlight', function () {
     'foo <i>bar</i> bart',
     'should highlight "bar" only'
   );
+
+/*3*/
 
   // Right truncature
   qt.parse('bar*');
@@ -35,6 +37,8 @@ test('highlight', function () {
     'should highlight words starting with "bar"'
   );
 
+/*4*/
+
   // Left truncature
   qt.parse('*bar');
   text = 'foo bar bart abar abart';
@@ -44,6 +48,8 @@ test('highlight', function () {
     'should highlight words ending with "bar"'
   );
 
+/*5*/
+
   // Left and right truncature
   qt.parse('*bar*');
   text = 'foo bar bart abar abart';
@@ -52,6 +58,8 @@ test('highlight', function () {
     'foo <i>bar</i> <i>bar</i>t a<i>bar</i> a<i>bar</i>t',
     'should highlight words starting or ending with "bar"'
   );
+
+/*6*/
 
   // Complex query
   qt.parse(
@@ -69,6 +77,8 @@ test('highlight', function () {
       '185cm Black: £18.98 End Date: Thursday… http://t.co/RQVYhHTB9Z',
     'should highlight "Abus" and "Cable Lock" only'
   );
+
+/*7*/
 
   // Accents
   qt.parse(
@@ -120,12 +130,13 @@ test('highlight', function () {
     'should highlight all words with accents'
   );
 
+/*8*/
+
   // Chinese
   qt = querytext({
-    matches: true,
-    wholeword: false
+    wholeword: false,
+    query: '转发'
   });
-  qt.parse('转发');
   text = '央广网北京10月14日消息(记者马文佳)据中国之声《新闻晚高峰》报道，《光明日报》昨天刊发了中国科学院院士、北京大学神经科学研究所名誉所长韩济生的文章名字叫做《在过度医疗背后》。这篇文章引起了各大媒体的相继转发。';
   equal(
     qt.highlight(text, '<i>', '</i>'),
@@ -133,11 +144,10 @@ test('highlight', function () {
     'should highlight "转发"'
   );
 
+/*9*/
+
   // NEAR operator
-  qt = querytext({
-    matches: true
-  });
-  qt.parse('"Chapelle-en-Serval Chantilly"~1');
+  qt = querytext('"Chapelle-en-Serval Chantilly"~1');
   text = 'Tiara Chateau Hotel Mont Royal Chantilly, La Chapelle-en-Serval : Consultez les 464 avis de voyageurs, 232 photos, et les meilleures offres pour Tiara...';
   equal(
     qt.highlight(text, '<i>', '</i>'),
@@ -145,10 +155,9 @@ test('highlight', function () {
     'should highlight 2 close words to a distance of 1'
   );
 
-  qt = querytext({
-    matches: true
-  });
-  qt.parse('"coeur français pouvoir"~5');
+/*10*/
+
+  qt = querytext('"coeur français pouvoir"~5');
   text = 'i à pénétrer au coeur même du pouvoir politique français, mais qu';
   equal(
     qt.highlight(text, '<i>', '</i>'),
@@ -156,10 +165,11 @@ test('highlight', function () {
     'should highlight 3 close words to a distance of 5'
   );
 
+/*11*/
+
   qt = querytext({
-    matches: true
+    query: '"prout pouet"~0'
   });
-  qt.parse('"prout pouet"~0');
   text = '.prout pouet beurp .pouet prout. beurp prout pouet.';
   equal(
     qt.highlight(text, '<i>', '</i>'),
@@ -167,21 +177,18 @@ test('highlight', function () {
     'should highlight 2 close words to a distance of 0'
   );
 
-  qt = querytext({
-    matches: true
-  });
-  qt.parse('"seulement"~5');
-  text = 'si et seulement seulement si';
-  notEqual(
-    qt.highlight(text, '<i>', '</i>'),
-    'si et <i>seulement</i> <i>seulement</i> si',
+/*12*/
+
+  qt = querytext('"seulement"~5');
+  equal(
+    qt.error,
+    '2 words expected at least for near operator',
     'should not highlight a word alone'
   );
 
-  qt = querytext({
-    matches: true
-  });
-  qt.parse('"le le"~100');
+/*13*/
+
+  qt = querytext('"le le"~100');
   text = 'la catastrophe. ,le,le,le Tout a c';
   equal(
     qt.highlight(text, '<i>', '</i>'),
@@ -189,10 +196,9 @@ test('highlight', function () {
     'should highlight 2 same words to a distance of 100'
   );
 
-  qt = querytext({
-    matches: true
-  });
-  qt.parse('"le le"~0');
+/*14*/
+
+  qt = querytext('"le le"~0');
   text = 'e. ,le:le\'le des saints.lelelelelele a infecté que quelques machines. Et pas n\'importe lesquelles : celles des co';
   equal(
     qt.highlight(text, '<i>', '</i>'),
@@ -200,15 +206,7 @@ test('highlight', function () {
     'should highlight 2 same words to a distance of 0'
   );
 
-  qt = querytext({
-    matches: true
-  });
-  throws(
-    function () {
-      qt.parse('"le"~0');
-    },
-    'throws with a single word inside quotes'
-  );
+/*15*/
 
   // Double UTF chars
   // Not ready yet, one day maybe...
