@@ -200,6 +200,16 @@ test('highlight', function () {
     'should highlight 2 same words to a distance of 0'
   );
 
+  qt = querytext({
+    matches: true
+  });
+  throws(
+    function () {
+      qt.parse('"le"~0');
+    },
+    'throws with a single word inside quotes'
+  );
+
   // Double UTF chars
   // Not ready yet, one day maybe...
   //
