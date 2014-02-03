@@ -23,21 +23,24 @@ constructors:
     sensitive: false,  //   case sensitive (default=false)
     wholeword: true,   //   whole word only (default=true)
     unaccent: true,    //   accent unsensitive (default=true)
-    matches: false,    //   want matched words with their position
+    matches: true ,    //   want matched words with their position (default=true)
+                       //     set it to false if you don't need highlighting or
+                       //     matches positions
     debug: false,      //   console debugging ouput (default=false)
     query: "query"     //   query string
   })                   // return a querytext object
 
 querytext object methods:
 
-  parse('query');    // return {error:"msg",pos:12} or the
+  parse('query');    // return {error:"msg",pos:offset} or the
                      // querytext object
   
   normalize();       // return the normalized query as string
   
   match('text');     // test if the text match the query
                      // if matches flag is true =>
-                     //	   return { word:[pos1,pos2], ... } or false
+                     //	   return an array of matches :
+                           [ { txt:"match", ofs:match_offset_in_bytes, pos:word_num } ...]
                      // if matches flag is false =>
                      //    return true or false
   
@@ -48,15 +51,11 @@ querytext object methods:
   highlight('text','before','after',ishtml)
                      // highlight a text with the query, inserting
                      // 'before' and 'after' around each matching node.
-                     // important: option "matches" must have been set
-                     // to use this function.
                      // return the text higlighted
   
   highlightml(DOMelement,'before','after')
                      // highlight a DOM tree with the query, inserting
                      // 'before' and 'after' around each matching node.
-                     // important: option "matches" must have been set
-                     // to use this function.
                      // return the DOMelement higlighted
 
 match usages:
@@ -204,7 +203,7 @@ var querytext=(function(o){
 			sensitive: false,
 			wholeword: true,
 			unaccent: true,
-			matches: false,
+			matches: true,
 			debug: false,
 			wordpos: false
 		},
