@@ -54,7 +54,7 @@
 						h += '<table><tr><th>word<th>offset<th>num';
 						z.forEach(function(k){
 							h += '<tr><td>'+k.txt+'<td>'+k.ofs;
-							if(k.pos) h+='<td>'+k.pos;
+							if(k.pos!==undefined) h+='<td>'+k.pos;
 						})
 						h += '</table>';
 					}
