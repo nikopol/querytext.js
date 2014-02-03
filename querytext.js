@@ -461,9 +461,9 @@ var querytext=(function(o){
 								w = w.toLowerCase();
 							if(self.opts.wholeword){
 								l = w.length;
-								w = w.replace(/^[\s,;:\-+=<>\\\/'"\(\)~&\[\]{}》《，]+/g,'');
+								w = w.replace(/^[\s\.,;:\-+=<>\\\/'"\(\)~&\[\]{}》《，]+/g,'');
 								p += (l-w.length);
-								w = w.replace(/[\s,;:\-+=<>\\\/'"\(\)~&\[\]{}》《，]+$/g,'');
+								w = w.replace(/[\s,\.;:\-+=<>\\\/'"\(\)~&\[\]{}》《，]+$/g,'');
 								if(l>1) node.rex.lastIndex--;
 							}
 							p = { txt:w, ofs:p };
