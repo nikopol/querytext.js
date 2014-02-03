@@ -277,6 +277,7 @@ var querytext=(function(o){
 									rex: text_rex(w)
 								})
 							});
+							if( b.subs.length<2 ) return {error:'2 words expected at least for near operator',pos:o+offset};
 							add_branch(b);
 							opts.wordpos = 
 							opts.matches = true;
@@ -406,9 +407,12 @@ var querytext=(function(o){
 				},
 				wordpos = function(o){
 					if( wordidx[o]==undefined ) {
-						var i = 0;
-						while( i<wordidx.length && wordidx[i]<o ) i++;
-						return i>0 ? wordidx[i-1] : 0;
+						var w = 0, i;
+						for(i in wordidx) {
+							if( i>o ) break;
+							w = wordidx[i];
+						}
+						return w;
 					} else
 						return wordidx[o];
 				},
