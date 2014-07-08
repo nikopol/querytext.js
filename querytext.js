@@ -485,9 +485,9 @@ var querytext=(function(o){
 				//NEAR spotted, need to calc wordidx
 				var
 					n = 0, 
-				    w = 0,
-				    l = txt.length,
-				    wchar = /^[\-0-9A-Za-z\u00C0-\u017F]+$/;
+					w = 0,
+					l = txt.length,
+					wchar = /^[\-0-9A-Za-z\u00C0-\u017F]+$/;
 				while( n<l )
 					if(wchar.test(txt[n])) {
 						wordidx[n] = w++;
@@ -498,7 +498,15 @@ var querytext=(function(o){
 			reset_node( this.tree );
 			ok = node_match( this.tree, this.opts.unaccent ? unaccent(txt) : txt );
 			if(this.opts.debug) console.log(this.dump());
-			if(ok && matches) return get_matches(this.tree);
+			if(ok && matches) {
+				var dup = {};
+				return get_matches(this.tree).filter(function(m){
+					var ok = !dup[m.pos];
+					dup[m.pos] = true;
+					return ok;
+				});
+				return m;
+			}
 			return ok;
 		},
 		highlightml: function(node,bef,aft) {
