@@ -1,5 +1,5 @@
-querytext.js 1.0 (c) 2012-2014 niko
-===================================
+querytext.js 1.0a (c) 2012-2014 niko
+====================================
 
 [![Build Status](https://travis-ci.org/ZorGleH/querytext.js.png)](https://travis-ci.org/ZorGleH/querytext.js)
 
