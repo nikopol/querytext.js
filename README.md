@@ -1,7 +1,7 @@
 querytext.js 1.0a (c) 2012-2014 niko
 ====================================
 
-[![Build Status](https://travis-ci.org/ZorGleH/querytext.js.png)](https://travis-ci.org/ZorGleH/querytext.js)
+[![Build Status](https://travis-ci.org/nikopol/querytext.js.png)](https://travis-ci.org/nikopol/querytext.js)
 
 **test or highlight if a text/html matches a boolean query**
 
