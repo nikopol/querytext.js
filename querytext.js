@@ -1,4 +1,4 @@
-// querytext.js 1.0a (c) 2012-2014 niko 
+// querytext.js 1.0b (c) 2012-2014 niko 
 // https://github.com/nikopol/querytext.js
 
 /*
