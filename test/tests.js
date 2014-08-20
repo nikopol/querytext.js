@@ -208,6 +208,23 @@ test('highlight', function () {
 
 /*15*/
 
+  qt = querytext('"abcdefghijklmnopqrstuvwxyz" OR ("a" AND (""))');
+  equal(
+    qt.error,
+    'empty quotes',
+    'should throw error empty quotes'
+  );
+
+/*16*/
+
+  equal(
+    qt.pos,
+    43,
+    'should throw error error empty quotes at character 43'
+  );
+
+/*17*/
+
   // Double UTF chars
   // Not ready yet, one day maybe...
   //
