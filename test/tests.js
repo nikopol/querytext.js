@@ -207,7 +207,8 @@ test('highlight', function () {
   );
 
 /*15*/
-
+                 //         1         2         3         4
+                //01234567890123456789012345678901234567890123456789
   qt = querytext('"abcdefghijklmnopqrstuvwxyz" OR ("a" AND (""))');
   equal(
     qt.error,
@@ -219,7 +220,7 @@ test('highlight', function () {
 
   equal(
     qt.pos,
-    43,
+    42,
     'should throw error error empty quotes at character 43'
   );
 

@@ -301,7 +301,7 @@ var querytext=(function(o){
 							n++;
 						}
 						if( n >= len ) return {error:'unbalanced parenthesis',pos:o+offset};
-						var b = parse_branch( t, o+1, opts );
+						var b = parse_branch( t, o+offset+1, opts );
 						if(b.error) return b;
 						add_branch(b,t);
 						n++;
@@ -501,8 +501,8 @@ var querytext=(function(o){
 			if(ok && matches) {
 				var dup = {};
 				return get_matches(this.tree).filter(function(m){
-					var ok = !dup[m.pos];
-					dup[m.pos] = true;
+					var ok = !dup[m.ofs];
+					dup[m.ofs] = true;
 					return ok;
 				});
 				return m;
