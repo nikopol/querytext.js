@@ -1,4 +1,4 @@
-// querytext.js 1.0b (c) 2012-2014 niko 
+// querytext.js 1.0c (c) 2012-2014 niko 
 // https://github.com/nikopol/querytext.js
 
 /*
@@ -197,7 +197,7 @@ var querytext=(function(o){
 		return txt;
 	},
 	qt = {
-		VERSION: 0.8,
+		VERSION: '1.0c',
 		opts: {
 			dftbool: 'OR',
 			sensitive: false,
@@ -352,7 +352,7 @@ var querytext=(function(o){
 				if(this.opts.debug) console.log(b.error,'at',b.pos);
 			} else {
 				this.tree = b;
-				if(this.opts.debug) console.log(this.dump());
+				if(this.opts.debug) console.log("[QT:parser]\n" + this.dump());
 			}
 			return this;
 		},
@@ -363,12 +363,13 @@ var querytext=(function(o){
 			var
 				not = node.not ? 'NOT ' : '',
 				src = node.src ? ' : '+not+'('+node.src+')' : '',
-				dst = node.dist!=undefined ? '('+node.dist+') ' : '',
-				hit = node.match!=undefined ? ' = '+node.match : '';
+				dst = node.dist!=undefined ? '('+node.dist+')' : '',
+				hit = node.match!=undefined ? ' = '+node.match : '',
+				pos = node.pos!=undefined ? ' ['+node.pos.map(function(p){ return p.txt+":"+p.ofs+":"+p.pos }).join('|')+']' : '',
 				self = this;
 			return node.bool
 				? ind+not+node.bool+dst+hit+src+"\n"+node.subs.map(function(n){ return self.dump(n,ind+' | ') }).join("\n")
-				: ind+not+'"'+node.text+'"'+hit;
+				: ind+not+'"'+node.text+'"'+hit+pos;
 		},
 		normalize: function(node){
 			if(!node) node = this.tree;
@@ -476,7 +477,7 @@ var querytext=(function(o){
 					return ok;
 				},
 				get_matches = function(node) {
-					if( node.bool ) node.subs.forEach(function(n){ get_matches(n) });
+					if( node.bool && node.match ) node.subs.forEach(function(n){ get_matches(n) });
 					else if( node.pos ) node.pos.forEach(function(p){ matches.push(p) });
 					return matches;
 				},
@@ -491,13 +492,13 @@ var querytext=(function(o){
 				while( n<l )
 					if(wchar.test(txt[n])) {
 						wordidx[n] = w++;
-						while( ++n<l && wchar.test(txt[n]) );
+						while( ++n<l && wchar.test(txt[n]) ){}
 					} else
-						while( ++n<l && !wchar.test(txt[n]) );
+						while( ++n<l && !wchar.test(txt[n]) ){}
 			}
 			reset_node( this.tree );
 			ok = node_match( this.tree, this.opts.unaccent ? unaccent(txt) : txt );
-			if(this.opts.debug) console.log(this.dump());
+			if(this.opts.debug) console.log("[QT:matcher]\n" + this.dump());
 			if(ok && matches) {
 				var dup = {};
 				return get_matches(this.tree).filter(function(m){
@@ -505,7 +506,6 @@ var querytext=(function(o){
 					dup[m.ofs] = true;
 					return ok;
 				});
-				return m;
 			}
 			return ok;
 		},
