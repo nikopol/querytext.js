@@ -1,4 +1,4 @@
-querytext.js 1.0b (c) 2012-2014 niko
+querytext.js 1.1 (c) 2012-2014 niko
 ====================================
 
 [![Build Status](https://travis-ci.org/nikopol/querytext.js.png)](https://travis-ci.org/nikopol/querytext.js)
@@ -36,6 +36,9 @@ querytext object methods:
   parse('query');    // return {error:"msg",pos:offset} or the
                      // querytext object
   
+  flatten();         // return a flat version of the tree in the form :
+                     // { or:[...], and:[...], not:[...] }
+
   normalize();       // return the normalized query as string
   
   match('text');     // test if the text match the query
@@ -74,7 +77,7 @@ match usages:
         query: "T",
         matches: true,
         wholeword: false
-    }).match("toto") //-> {t:[0,2]}
+    }).match("toto") //-> [ {ofs:0,txt:'t'}, {ofs:2,txt:'t'} ]
 
 analysis usages:
 
