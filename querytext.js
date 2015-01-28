@@ -1,4 +1,4 @@
-// querytext.js 1.0c (c) 2012-2014 niko 
+// querytext.js 1.1 (c) 2012-2015 niko 
 // https://github.com/nikopol/querytext.js
 
 /*
@@ -35,6 +35,9 @@ querytext object methods:
   parse('query');    // return {error:"msg",pos:offset} or the
                      // querytext object
   
+  flatten();         // return a flat version of the tree in the form :
+                     // { or:[...], and:[...], not:[...] }
+
   normalize();       // return the normalized query as string
   
   match('text');     // test if the text match the query
@@ -73,7 +76,7 @@ match usages:
     query: "T",
     matches: true,
     wholeword: false
-  }).match("toto") //-> {t:[0,2]}
+  }).match("toto") //-> [ {ofs:0,txt:'t'}, {ofs:2,txt:'t'} ]
 
 analysis usages:
 
@@ -197,7 +200,7 @@ var querytext=(function(o){
 		return txt;
 	},
 	qt = {
-		VERSION: '1.0c',
+		VERSION: '1.1',
 		opts: {
 			dftbool: 'OR',
 			sensitive: false,
@@ -370,6 +373,22 @@ var querytext=(function(o){
 			return node.bool
 				? ind+not+node.bool+dst+hit+src+"\n"+node.subs.map(function(n){ return self.dump(n,ind+' | ') }).join("\n")
 				: ind+not+'"'+node.text+'"'+hit+pos;
+		},
+		flatten: function(node,flat,mode){
+			if(node==undefined) node = this.tree;
+			if(flat==undefined) flat = {not:[],or:[],and:[]};
+			if(mode==undefined) mode = {};
+			if(node.not) mode.not = !mode.not;
+			if(node.bool) {
+				var self = this;
+				node.subs.forEach(function(s){
+					flat = self.flatten(s,flat,{not:mode.not,or:node.bool=="OR",and:node.bool=="AND"});
+				});
+			}
+			else if(mode.not) flat.not.push(node.text);
+			else if(mode.and) flat.and.push(node.text);
+			else flat.or.push(node.text);
+			return flat;
 		},
 		normalize: function(node){
 			if(!node) node = this.tree;

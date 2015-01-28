@@ -226,6 +226,23 @@ test('highlight', function () {
 
 /*17*/
 
+  qt = querytext('"de libre"~10 OR "de rocher"~10');
+  text = 'de je vais vous parler 3 correcteurs drugstore et donc peu chers. J\'ai une véritable passion pour les correcteurs. C\'est un produit que j\'adore tester même si j\'en parle assez peu sur le blog, je suis plutôt Cover Stick, Essence / teinte 06 Matt Ivory / environ 3€ Mon petit dernier est le Cover Stick d\'Essence et c\'est celui que j\'utilise actuellement, car oui j\'ai gardé les deux autres juste pour la revue car en fait, ils sont terminés. Il reste juste un peu de matière dans le Gemey mais j\'ai trop de mal à l\'attraper attraper attraper attraper attraper attraper attraper attraper et entre-temps j\'ai terminé le Rimmel. J\'avais envie de tester une nouvelle texture sachant que j\'avais déjà eu avoir des correcteurs stick par le passé (notamment chez Yves Rocher) et que j\'ai souvent de';
+  equal(
+    qt.highlight(text, '<i>', '</i>'),
+    'de je vais vous parler 3 correcteurs drugstore et donc peu chers. J\'ai une véritable passion pour les correcteurs. C\'est un produit que j\'adore tester même si j\'en parle assez peu sur le blog, je suis plutôt Cover Stick, Essence / teinte 06 Matt Ivory / environ 3€ Mon petit dernier est le Cover Stick d\'Essence et c\'est celui que j\'utilise actuellement, car oui j\'ai gardé les deux autres juste pour la revue car en fait, ils sont terminés. Il reste juste un peu de matière dans le Gemey mais j\'ai trop de mal à l\'attraper attraper attraper attraper attraper attraper attraper attraper et entre-temps j\'ai terminé le Rimmel. J\'avais envie de tester une nouvelle texture sachant que j\'avais déjà eu avoir des correcteurs stick par le passé (notamment chez Yves <i>Rocher</i>) et que j\'ai souvent <i>de</i>',
+    'should only highlight words to a distance of 10'
+  );
+
+/*18*/
+  qt = querytext('boobs AND natural OR breast AND NOT fake');
+  deepEqual(
+    qt.flatten(),
+    {or:['breast'],and:['boobs','natural'],not:['fake']},
+    "should flatten"
+  );
+
+
   // Double UTF chars
   // Not ready yet, one day maybe...
   //
@@ -237,15 +254,5 @@ test('highlight', function () {
   //    '<strong>œ</strong> <strong>ß</strong>',
   //   'should highlight all words with double chars'
   // );
-
-/*18*/
-
-  qt = querytext('"de libre"~10 OR "de rocher"~10');
-  text = 'de je vais vous parler 3 correcteurs drugstore et donc peu chers. J\'ai une véritable passion pour les correcteurs. C\'est un produit que j\'adore tester même si j\'en parle assez peu sur le blog, je suis plutôt Cover Stick, Essence / teinte 06 Matt Ivory / environ 3€ Mon petit dernier est le Cover Stick d\'Essence et c\'est celui que j\'utilise actuellement, car oui j\'ai gardé les deux autres juste pour la revue car en fait, ils sont terminés. Il reste juste un peu de matière dans le Gemey mais j\'ai trop de mal à l\'attraper attraper attraper attraper attraper attraper attraper attraper et entre-temps j\'ai terminé le Rimmel. J\'avais envie de tester une nouvelle texture sachant que j\'avais déjà eu avoir des correcteurs stick par le passé (notamment chez Yves Rocher) et que j\'ai souvent de';
-  equal(
-    qt.highlight(text, '<i>', '</i>'),
-    'de je vais vous parler 3 correcteurs drugstore et donc peu chers. J\'ai une véritable passion pour les correcteurs. C\'est un produit que j\'adore tester même si j\'en parle assez peu sur le blog, je suis plutôt Cover Stick, Essence / teinte 06 Matt Ivory / environ 3€ Mon petit dernier est le Cover Stick d\'Essence et c\'est celui que j\'utilise actuellement, car oui j\'ai gardé les deux autres juste pour la revue car en fait, ils sont terminés. Il reste juste un peu de matière dans le Gemey mais j\'ai trop de mal à l\'attraper attraper attraper attraper attraper attraper attraper attraper et entre-temps j\'ai terminé le Rimmel. J\'avais envie de tester une nouvelle texture sachant que j\'avais déjà eu avoir des correcteurs stick par le passé (notamment chez Yves <i>Rocher</i>) et que j\'ai souvent <i>de</i>',
-    'should only highlight words to a distance of 10'
-  );
 
 });
