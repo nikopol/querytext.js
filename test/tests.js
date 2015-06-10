@@ -207,8 +207,7 @@ test('highlight', function () {
   );
 
 /*15*/
-                 //         1         2         3         4
-                //01234567890123456789012345678901234567890123456789
+
   qt = querytext('"abcdefghijklmnopqrstuvwxyz" OR ("a" AND (""))');
   equal(
     qt.error,
@@ -235,11 +234,25 @@ test('highlight', function () {
   );
 
 /*18*/
+
   qt = querytext('boobs AND natural OR breast AND NOT fake');
   deepEqual(
     qt.flatten(),
     {or:['breast'],and:['boobs','natural'],not:['fake']},
     "should flatten"
+  );
+
+/*19*/
+
+  qt = querytext({
+    wholeword: false,
+    query: '"word1 word2 "~5'
+  });
+  text = 'word1 word2';
+  equal(
+    qt.highlight(text, '<i>', '</i>'),
+    '<i>word1</i> <i>word2</i>',
+    'should highlight words even when there are spaces in the NEAR'
   );
 
 
