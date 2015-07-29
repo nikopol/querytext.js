@@ -235,11 +235,21 @@ test('highlight', function () {
   );
 
 /*18*/
+
   qt = querytext('boobs AND natural OR breast AND NOT fake');
   deepEqual(
     qt.flatten(),
     {or:['breast'],and:['boobs','natural'],not:['fake']},
     "should flatten"
+  );
+  
+/*19*/
+
+  qt = querytext('"bar foo "~10');
+  text = 'foo\n\nbar';
+  equal(
+    qt.highlight(text, '<i>', '</i>'),
+    '<i>foo</i>\n\n<i>bar</i>'
   );
 
 
